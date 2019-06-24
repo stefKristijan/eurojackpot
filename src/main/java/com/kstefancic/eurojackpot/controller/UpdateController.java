@@ -1,32 +1,32 @@
-package com.kstefancic.eurojackpot;
+package com.kstefancic.eurojackpot.controller;
 
+import com.kstefancic.eurojackpot.LotteryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 
 @Controller
 @RequestMapping("update")
-public class TestController {
+public class UpdateController {
 
-    private final EurojackpotService eurojackpotService;
+    private final LotteryService lotteryService;
 
-    public TestController(EurojackpotService eurojackpotService) {
-        this.eurojackpotService = eurojackpotService;
+    public UpdateController(LotteryService lotteryService) {
+        this.lotteryService = lotteryService;
     }
 
     @GetMapping
     public ResponseEntity<?> updateDraws() throws IOException {
-        return ResponseEntity.ok(eurojackpotService.updateDraws());
+        return ResponseEntity.ok(lotteryService.updateDraws());
     }
 
     @GetMapping("/draws")
     public String getDraws(Model model) {
-        model.addAttribute("draws", eurojackpotService.findAll());
+        model.addAttribute("draws", lotteryService.findAll());
         return "index.html";
     }
 }

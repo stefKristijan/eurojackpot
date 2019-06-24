@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class SupersportMasterApplication {
+public class LotteryMasterApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(SupersportMasterApplication.class, args);
+        SpringApplication.run(LotteryMasterApplication.class, args);
     }
 
 }
