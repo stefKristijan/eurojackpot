@@ -27,8 +27,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.kstefancic.eurojackpot.domain.Constants.*;
@@ -52,6 +51,58 @@ public class LotteryServiceImpl implements LotteryService {
         initializeLoto6od45();
         initializeLoto7od39();
         initializeEurojackpot();
+        initializeLotteriesFromPsk();
+    }
+
+    private void initializeLotteriesFromPsk() {
+        try {
+            Map<String, Lottery> lotteries = new HashMap<>();
+            LocalDate date = LocalDate.of(2019, 1, 1);
+            LocalDate today = LocalDate.now();
+            while (date.isBefore(today) || date.isEqual(today)) {
+                Document document = Jsoup.connect(String.format("https://www.psk.hr/Results/Lotto?date=%s", date.toString())).get();
+                Elements rows = document.select(".result-row");
+                for (Element row : rows) {
+                    String name = row.select(".cell.name").text();
+                    //Add all except the two that are drawing every 10minutes and CANADA MAX that has an error
+                    if (!name.equals("Italija 10e Lotto 20/90") && !name.equals("Grčka Kino Lotto 20/80") && !name.equals("Canada Max 7/49")) {
+                        LocalDateTime time = LocalDateTime.parse(row.select(".cell.date").text(), DateTimeFormatter.ofPattern("d.M.yyyy. H:mm:ss"));
+                        List<Integer> numbers = Arrays.stream(
+                                row.select(".cell.winning").text().split(",")).map(Integer::parseInt).collect(Collectors.toList()
+                        );
+                        String uniqueName = name.replaceAll("\\s+", "");
+                        if (!lotteries.containsKey(uniqueName)) {
+                            String[] draws = name.split(" ");
+                            String drawnMax = draws[draws.length - 1];
+                            int draw = Integer.parseInt(drawnMax.split("/")[0]);
+                            int max = Integer.parseInt(drawnMax.split("/")[1]);
+                            lotteries.put(
+                                    uniqueName,
+                                    new Lottery(name.replace(String.format(" %s", draws[draws.length - 1]), ""), uniqueName, draw, max)
+                            );
+                        }
+                        lotteries.get(uniqueName).addDraw(new Draw(time, numbers));
+                    }
+                }
+
+                date = date.plusDays(1);
+            }
+            lotteries.forEach((key, val) -> {
+                Lottery lottery = lotteryRepository.findByUniqueName(key).orElseGet(() -> {
+                    List<Draw> draws = val.getDraws();
+                    val.setDraws(null);
+                    Lottery saved = lotteryRepository.save(val);
+                    saved.setDraws(draws);
+                    return saved;
+                });
+                lottery.getDraws().forEach(d -> d.setLottery(lottery));
+                drawRepository.saveAll(lottery.getDraws());
+            });
+        } catch (Exception e) {
+            logger.error("Lotteries from PSK was not initialized successfully!", e);
+            lotteryRepository.flush();
+            drawRepository.flush();
+        }
     }
 
     private void initializeLoto7od39() {

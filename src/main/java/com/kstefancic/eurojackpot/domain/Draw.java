@@ -47,7 +47,7 @@ public class Draw {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(unique = true, updatable = false, nullable = false)
+    @Column(updatable = false, nullable = false)
     private LocalDateTime time;
     @ElementCollection
     @CollectionTable(name = "numbers",
@@ -72,6 +72,12 @@ public class Draw {
         Collections.sort(extraNums);
         this.numbers = new ArrayList<>(numbers);
         this.extraNumbers = new ArrayList<>(extraNums);
+    }
+
+    public Draw(LocalDateTime time, List<Integer> numbers) {
+        this.time = time;
+        Collections.sort(numbers);
+        this.numbers = new ArrayList<>(numbers);
     }
 
     @Override

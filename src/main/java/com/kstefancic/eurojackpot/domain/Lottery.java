@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -30,6 +31,22 @@ public class Lottery {
     private List<Draw> draws;
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "lottery")
     private List<ResultUrl> resultUrls;
+
+    public Lottery(String name, String uniqueName, int draw, int maxNumber){
+        this.name = name;
+        this.uniqueName = name;
+        this.draw = draw;
+        this.maxNumber = maxNumber;
+    }
+
+    public Lottery(){}
+
+    public void addDraw(Draw draw){
+        if(this.draws == null){
+            this.draws = new ArrayList<>();
+        }
+        this.draws.add(draw);
+    }
 
     public boolean hasExtraNumbers(){
         return this.maxExtraNumber != null && this.extraDraw != null;

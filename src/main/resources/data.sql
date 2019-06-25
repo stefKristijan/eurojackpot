@@ -10,3 +10,5 @@ insert into result_urls(url, lottery_id) values
 ('https://www.euro-jackpot.net/hr/rezultati-arhiva-2017', 1),
 ('https://www.euro-jackpot.net/hr/rezultati-arhiva-2018', 1),
 ('https://www.euro-jackpot.net/hr/rezultati-arhiva-2019', 1);
+
+ALTER TABLE draws ADD CONSTRAINT uq_time_lottery UNIQUE (lottery_id, time);
