@@ -35,13 +35,13 @@ public interface DrawRepository extends JpaRepository<Draw, Long> {
     List<Draw> findAllByLotteryId(int lotteryId, Pageable pageable);
 
     @Query(
-            value = "select count(*) from (select * from (select * from draws where lottery_id = ?1 ORDER by date desc limit ?2) d join numbers n on (n.draw_id = d.id) where n.numbers >= ?3 and n.numbers <= ?4) t",
+            value = "select count(*) from (select * from (select * from draws where lottery_id = ?1 ORDER by time desc limit ?2) d join numbers n on (n.draw_id = d.id) where n.numbers >= ?3 and n.numbers <= ?4) t",
             nativeQuery = true
     )
     int countInRange(int lotteryId, int limit, int fromNum, int toNum);
 
     @Query(
-            value = "select count(*) from (select * from (select * from draws where lottery_id = ?1 ORDER by date desc limit ?2) d join extra_numbers n on (n.draw_id = d.id) where n.extra_numbers >= ?3 and n.extra_numbers <= ?4) t",
+            value = "select count(*) from (select * from (select * from draws where lottery_id = ?1 ORDER by time desc limit ?2) d join extra_numbers n on (n.draw_id = d.id) where n.extra_numbers >= ?3 and n.extra_numbers <= ?4) t",
             nativeQuery = true
     )
     int countExtraInRange(int lotteryId, int limit, int fromNum, int toNum);
@@ -58,7 +58,7 @@ public interface DrawRepository extends JpaRepository<Draw, Long> {
                 sbGroupBy.append(String.format(", n%d." + tableField, i));
             }
         }
-        sb.append(String.format(" from (select * from draws where lottery_id = %d order by date desc limit %d) d", lotteryId, draws))
+        sb.append(String.format(" from (select * from draws where lottery_id = %d order by time desc limit %d) d", lotteryId, draws))
                 .append(sbJoins)
                 .append(sbGroupBy)
                 .append(" having c > 1")

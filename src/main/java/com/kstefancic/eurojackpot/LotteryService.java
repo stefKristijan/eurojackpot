@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface LotteryService {
 
-    List<Draw> updateDraws();
+    void initializeLotteries();
 
     List<Lottery> findAll();
 

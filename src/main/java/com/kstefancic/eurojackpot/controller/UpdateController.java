@@ -21,11 +21,6 @@ public class UpdateController {
         this.service = service;
     }
 
-    @GetMapping
-    public ResponseEntity<?> updateDraws() throws IOException {
-        return ResponseEntity.ok(lotteryService.updateDraws());
-    }
-
     @GetMapping("test")
     public void testUpdate(){
         service.updateDraws();

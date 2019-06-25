@@ -34,7 +34,7 @@ public class StatisticsServiceImpl implements StatisticsService {
     public NumberStatistics lotteryNumberStats(int lotteryId, Integer draws) {
         Lottery lottery = lotteryRepository.findById(lotteryId)
                 .orElseThrow(() -> new EntityNotFoundException(Constants.NOT_FOUND_LOTTERY));
-        Pageable pageable = PageRequest.of(0, draws != null && draws > 0 ? draws : Integer.MAX_VALUE, Sort.by("date").descending());
+        Pageable pageable = PageRequest.of(0, draws != null && draws > 0 ? draws : Integer.MAX_VALUE, Sort.by("time").descending());
         List<Draw> drawList = drawRepository.findAllByLotteryId(lotteryId, pageable);
         NumberStatistics numberStatistics = new NumberStatistics(drawList.size(), lottery);
         for (int i = 0; i < drawList.size(); i++) {

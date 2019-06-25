@@ -9,6 +9,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,13 +29,15 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.kstefancic.eurojackpot.domain.Constants.*;
 
 @Service
 @Transactional
 public class LotteryServiceImpl implements LotteryService {
+
+    Logger logger = LoggerFactory.getLogger(LotteryServiceImpl.class);
 
     private final DrawRepository drawRepository;
     private final LotteryRepository lotteryRepository;
@@ -44,19 +48,74 @@ public class LotteryServiceImpl implements LotteryService {
     }
 
     @Override
-    public List<Draw> updateDraws() {
-        List<Document> documents = new ArrayList<>();
-        Lottery lottery = lotteryRepository.findByUniqueName(EUROJACKPOT).orElseGet(() -> {
-            Lottery lottery1 = new Lottery();
-            lottery1.setUniqueName(EUROJACKPOT);
-            lottery1.setName(EUROJACKPOT);
-            lottery1.setDraw(5);
-            lottery1.setMaxNumber(50);
-            lottery1.setExtraDraw(2);
-            lottery1.setMaxExtraNumber(10);
-            return lotteryRepository.save(lottery1);
-        });
+    public void initializeLotteries() {
+        initializeLoto6od45();
+        initializeLoto7od39();
+        initializeEurojackpot();
+    }
+
+    private void initializeLoto7od39() {
         try {
+            Lottery lottery7od39 = lotteryRepository.findByUniqueName(LOTO_7_OD_39_UK).orElseGet(() -> {
+                Lottery lottery = new Lottery();
+                lottery.setName(LOTO_7_OD_39);
+                lottery.setUniqueName(LOTO_7_OD_39_UK);
+                lottery.setMaxNumber(39);
+                lottery.setDraw(7);
+                lottery.setExtraDraw(1);
+                lottery.setMaxExtraNumber(39);
+                return lotteryRepository.save(lottery);
+            });
+            parseAndSaveDraws(lottery7od39, "Loto7od392018.csv");
+            parseAndSaveDraws(lottery7od39, "Loto7od392019.csv");
+        } catch (Exception e) {
+            logger.error("Loto 7 od 39 was not initialized successfully!", e);
+            drawRepository.flush();
+        }
+    }
+
+    private void initializeLoto6od45() {
+        try {
+            Lottery lottery6od45 = lotteryRepository.findByUniqueName(LOTO_6_OD_45_UK).orElseGet(() -> {
+                Lottery lottery = new Lottery();
+                lottery.setName(LOTO_6_OD_45);
+                lottery.setUniqueName(LOTO_6_OD_45_UK);
+                lottery.setMaxNumber(45);
+                lottery.setDraw(6);
+                lottery.setExtraDraw(1);
+                lottery.setMaxExtraNumber(45);
+                return lotteryRepository.save(lottery);
+            });
+            parseAndSaveDraws(lottery6od45, "Loto6od452018.csv");
+            parseAndSaveDraws(lottery6od45, "Loto6od452019.csv");
+        } catch (Exception e) {
+            logger.error("Loto 6 od 45 was not initialized successfully!", e);
+            drawRepository.flush();
+        }
+    }
+
+    private void parseAndSaveDraws(Lottery lottery, String fileName) {
+        List<Draw> draws = getDrawsFromCsv(fileName, lottery.getDraw(), lottery.getExtraDraw()).stream()
+                .filter(d -> !drawRepository.getByDateAndLotteryId(d.getTime().toLocalDate().toString(), lottery.getId()).isPresent())
+                .collect(Collectors.toList());
+        draws.forEach(d -> d.setLottery(lottery));
+        if (draws.size() > 0)
+            drawRepository.saveAll(draws);
+    }
+
+    private void initializeEurojackpot() {
+        try {
+            List<Document> documents = new ArrayList<>();
+            Lottery lottery = lotteryRepository.findByUniqueName(EUROJACKPOT).orElseGet(() -> {
+                Lottery lottery1 = new Lottery();
+                lottery1.setUniqueName(EUROJACKPOT);
+                lottery1.setName(EUROJACKPOT);
+                lottery1.setDraw(5);
+                lottery1.setMaxNumber(50);
+                lottery1.setExtraDraw(2);
+                lottery1.setMaxExtraNumber(10);
+                return lotteryRepository.save(lottery1);
+            });
             LocalDateTime time = drawRepository.latestDrawTime(lottery.getId());
             if (time == null) {
                 time = LocalDateTime.of(2012, 1, 1, 20, 0);
@@ -66,57 +125,37 @@ public class LotteryServiceImpl implements LotteryService {
                         String.format("https://www.euro-jackpot.net/hr/rezultati-arhiva-%d", year)
                 ).get());
             }
-        } catch (IOException e) {
-            throw new RuntimeException("Error while downloading data");
-        }
 
-        List<Draw> draws = new ArrayList<>();
-        for (Document document : documents) {
-            Elements drawEls = document.select("table tbody tr td");
-            LocalDate date = null;
-            for (int i = 0; i < drawEls.size(); i++) {
-                if (i % 2 == 0) {
-                    date = LocalDate.parse(
-                            drawEls.get(i).select("a").attr("href").split("/")[3],
-                            DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-                    if (drawRepository.getByDateAndLotteryId(date.toString(), lottery.getId()).isPresent())
-                        i++;
-                } else {
-                    List<Integer> nums = new ArrayList<>();
-                    List<Integer> extra = new ArrayList<>();
-                    for (Element numbers : drawEls.get(i).select("ul li.ball span"))
-                        nums.add(Integer.parseInt(numbers.text()));
-                    for (Element extraNum : drawEls.get(i).select("ul li.euro span"))
-                        extra.add(Integer.parseInt(extraNum.text()));
+            List<Draw> draws = new ArrayList<>();
+            for (Document document : documents) {
+                Elements drawEls = document.select("table tbody tr td");
+                LocalDate date = null;
+                for (int i = 0; i < drawEls.size(); i++) {
+                    if (i % 2 == 0) {
+                        date = LocalDate.parse(
+                                drawEls.get(i).select("a").attr("href").split("/")[3],
+                                DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+                        if (drawRepository.getByDateAndLotteryId(date.toString(), lottery.getId()).isPresent())
+                            i++;
+                    } else {
+                        List<Integer> nums = new ArrayList<>();
+                        List<Integer> extra = new ArrayList<>();
+                        for (Element numbers : drawEls.get(i).select("ul li.ball span"))
+                            nums.add(Integer.parseInt(numbers.text()));
+                        for (Element extraNum : drawEls.get(i).select("ul li.euro span"))
+                            extra.add(Integer.parseInt(extraNum.text()));
 
-                    draws.add(new Draw(LocalDateTime.of(date, LocalTime.of(20, 0)), nums, extra));
-                    nums.clear();
+                        draws.add(new Draw(LocalDateTime.of(date, LocalTime.of(20, 0)), nums, extra));
+                        nums.clear();
+                    }
                 }
             }
-        }
 
-        draws.forEach(d -> d.setLottery(lottery));
-        initializeLotteries();
-        return drawRepository.saveAll(draws);
-    }
-
-    public void initializeLotteries() {
-        Optional<Lottery> lotteryOpt = lotteryRepository.findByUniqueName(LOTO_6_OD_45_UK);
-        if (!lotteryOpt.isPresent()) {
-            Lottery lottery = new Lottery();
-            lottery.setName(LOTO_6_OD_45);
-            lottery.setUniqueName(LOTO_6_OD_45_UK);
-            lottery.setMaxNumber(45);
-            lottery.setDraw(6);
-            lottery.setExtraDraw(1);
-            lottery.setMaxExtraNumber(45);
-            List<Draw> drawsFromCsv = getDrawsFromCsv("Loto6od452018.csv", lottery.getDraw(), lottery.getExtraDraw());
-            Lottery saved = lotteryRepository.save(lottery);
-            drawsFromCsv.forEach(d -> d.setLottery(saved));
-            List<Draw> draws2019 = getDrawsFromCsv("Loto6od452019.csv", lottery.getDraw(), lottery.getExtraDraw());
-            draws2019.forEach(d -> d.setLottery(saved));
-            drawRepository.saveAll(drawsFromCsv);
-            drawRepository.saveAll(draws2019);
+            draws.forEach(d -> d.setLottery(lottery));
+            drawRepository.saveAll(draws);
+        } catch (Exception e) {
+            logger.error("Eurojackpot was not initialized successfully!", e);
+            drawRepository.flush();
         }
     }
 
@@ -165,7 +204,7 @@ public class LotteryServiceImpl implements LotteryService {
         Lottery lottery = lotteryRepository.findById(lotteryId)
                 .orElseThrow(() -> new EntityNotFoundException(Constants.NOT_FOUND_LOTTERY));
         Pageable pageable = PageRequest.of(pageReq.getPageNumber(), pageReq.getPageSize(),
-                Sort.by("date").descending());
+                Sort.by("time").descending());
         return drawRepository.findAllByLotteryId(lotteryId, pageable);
     }
 
