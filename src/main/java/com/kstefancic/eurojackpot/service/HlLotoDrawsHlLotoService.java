@@ -23,14 +23,14 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
-public class HlLotoDrawsUpdateService implements UpdateDrawsService {
+public class HlLotoDrawsHlLotoService implements HlLotoDrawsService {
 
-    private static final Logger logger = LoggerFactory.getLogger(HlLotoDrawsUpdateService.class);
+    private static final Logger logger = LoggerFactory.getLogger(HlLotoDrawsHlLotoService.class);
 
     private final LotteryRepository lotteryRepository;
     private final DrawRepository drawRepository;
 
-    public HlLotoDrawsUpdateService(DrawRepository drawRepository, LotteryRepository lotteryRepository) {
+    public HlLotoDrawsHlLotoService(DrawRepository drawRepository, LotteryRepository lotteryRepository) {
         this.drawRepository = drawRepository;
         this.lotteryRepository = lotteryRepository;
     }
@@ -60,7 +60,7 @@ public class HlLotoDrawsUpdateService implements UpdateDrawsService {
             String[] parts = dateStr.split(" ");
             LocalDate date = LocalDate.parse(parts[parts.length - 1], DateTimeFormatter.ofPattern("dd.MM.yyyy."));
             if (drawRepository.getByDateAndLotteryId(date.toString(), lottery.getId()).isPresent()) {
-                logger.info("Newest downloaded draw is already present in " + lottery.getUniqueName() + " draws");
+                logger.info("Newest draw is already present in " + lottery.getUniqueName() + " draws");
             } else {
                 LocalDateTime time = LocalDateTime.of(date, LocalTime.of(20, 0));
                 List<Integer> numberList = document.select("div#winnings-info li").stream()
