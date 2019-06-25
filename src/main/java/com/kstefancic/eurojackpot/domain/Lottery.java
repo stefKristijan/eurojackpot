@@ -6,6 +6,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "lotteries")
@@ -16,6 +17,8 @@ public class Lottery {
     private Integer id;
     @NotBlank
     private String name;
+    @Column(unique = true, nullable = false)
+    private String uniqueName;
     @NotNull
     private Integer maxNumber;
     @NotNull
@@ -96,6 +99,14 @@ public class Lottery {
         this.extraDraw = extraDraw;
     }
 
+    public String getUniqueName() {
+        return uniqueName;
+    }
+
+    public void setUniqueName(String uniqueName) {
+        this.uniqueName = uniqueName;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -103,13 +114,13 @@ public class Lottery {
 
         Lottery lottery = (Lottery) o;
 
-        if (id != null ? !id.equals(lottery.id) : lottery.id != null) return false;
+        if (!Objects.equals(id, lottery.id)) return false;
         if (!name.equals(lottery.name)) return false;
         if (!maxNumber.equals(lottery.maxNumber)) return false;
         if (!draw.equals(lottery.draw)) return false;
-        if (maxExtraNumber != null ? !maxExtraNumber.equals(lottery.maxExtraNumber) : lottery.maxExtraNumber != null)
+        if (!Objects.equals(maxExtraNumber, lottery.maxExtraNumber))
             return false;
-        return extraDraw != null ? extraDraw.equals(lottery.extraDraw) : lottery.extraDraw == null;
+        return Objects.equals(extraDraw, lottery.extraDraw);
     }
 
     @Override

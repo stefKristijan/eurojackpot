@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -47,7 +48,7 @@ public class Draw {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(unique = true, updatable = false, nullable = false)
-    private LocalDate date;
+    private LocalDateTime time;
     @ElementCollection
     @CollectionTable(name = "numbers",
             joinColumns = @JoinColumn(name = "draw_id")
@@ -65,8 +66,8 @@ public class Draw {
 
     public Draw(){}
 
-    public Draw(LocalDate date, List<Integer> numbers, List<Integer> extraNums) {
-        this.date = date;
+    public Draw(LocalDateTime time, List<Integer> numbers, List<Integer> extraNums) {
+        this.time = time;
         Collections.sort(numbers);
         Collections.sort(extraNums);
         this.numbers = new ArrayList<>(numbers);
@@ -81,7 +82,7 @@ public class Draw {
         Draw draw = (Draw) o;
 
         if (!Objects.equals(id, draw.id)) return false;
-        if (!date.equals(draw.date)) return false;
+        if (!time.equals(draw.time)) return false;
         if (!numbers.equals(draw.numbers)) return false;
         if (!Objects.equals(extraNumbers, draw.extraNumbers)) return false;
         return Objects.equals(lottery, draw.lottery);
@@ -90,7 +91,7 @@ public class Draw {
     @Override
     public int hashCode() {
         int result = id != null ? id.hashCode() : 0;
-        result = 31 * result + date.hashCode();
+        result = 31 * result + time.hashCode();
         result = 31 * result + numbers.hashCode();
         result = 31 * result + (extraNumbers != null ? extraNumbers.hashCode() : 0);
         result = 31 * result + (lottery != null ? lottery.hashCode() : 0);
@@ -105,8 +106,8 @@ public class Draw {
         this.id = id;
     }
 
-    public void setDate(LocalDate date) {
-        this.date = date;
+    public void setTime(LocalDateTime time) {
+        this.time = time;
     }
 
     public void setNumbers(List<Integer> numbers) {
@@ -126,14 +127,16 @@ public class Draw {
     }
 
     public List<Integer> getExtraNumbers() {
+        extraNumbers.sort(Integer::compareTo);
         return extraNumbers;
     }
 
-    public LocalDate getDate() {
-        return date;
+    public LocalDateTime getTime() {
+        return time;
     }
 
     public List<Integer> getNumbers() {
+        numbers.sort(Integer::compareTo);
         return numbers;
     }
 }

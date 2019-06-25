@@ -71,8 +71,9 @@ public class DrawController {
     public ResponseEntity<?> lotteryMostCommon(
             @PathVariable("id") int lotteryId,
             @RequestParam(name = "draws", required = false) Integer draws,
-            @RequestParam("quantity") int quantity
+            @RequestParam("quantity") int quantity,
+            @RequestParam("extraQuantity") int extraQuantity
     ){
-        return ResponseEntity.ok(statisticsService.lotteryMostCommon(lotteryId, quantity, draws));
+        return ResponseEntity.ok(statisticsService.lotteryMostCommon(lotteryId, quantity, draws, extraQuantity));
     }
 }

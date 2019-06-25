@@ -64,13 +64,21 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     @Override
-    public List<MostCommon> lotteryMostCommon(int lotteryId, int quantity, Integer draws) {
+    public MostCommonStatistics lotteryMostCommon(int lotteryId, int quantity, Integer draws, int extraQuantity) {
         Lottery lottery = lotteryRepository.findById(lotteryId)
                 .orElseThrow(() -> new EntityNotFoundException(Constants.NOT_FOUND_LOTTERY));
-        List<MostCommon> mostCommonStats = new ArrayList<>();
-        if(quantity < 2 || quantity > lottery.getDraw()){
+        if (quantity < 2 || quantity > lottery.getDraw()) {
             quantity = 2;
         }
-        return drawRepository.mostCommonStats(em, lotteryId, quantity, draws != null && draws > 0 ? draws : Integer.MAX_VALUE);
+        List<MostCommon> mostCommons = drawRepository.mostCommonStats(em, lotteryId, quantity, draws != null && draws > 0 ? draws : Integer.MAX_VALUE, "numbers");
+        List<MostCommon> extraMostCommons = null;
+        if (lottery.hasExtraNumbers()) {
+            if (extraQuantity < 2 || quantity > lottery.getExtraDraw()) {
+                extraQuantity = lottery.getExtraDraw();
+            }
+            extraMostCommons = drawRepository.mostCommonStats(em, lotteryId, extraQuantity, draws != null && draws > 0 ? draws : Integer.MAX_VALUE, "extra_numbers");
+        }
+
+        return new MostCommonStatistics(mostCommons, extraMostCommons);
     }
 }
