@@ -5,5 +5,5 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public interface UpdateDrawsService {
 
-    void updateDraws();
+    void updateDraws(String uniqueLotteryName, String lotteryResultUrl);
 }

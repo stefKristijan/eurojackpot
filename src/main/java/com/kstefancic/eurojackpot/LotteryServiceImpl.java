@@ -37,7 +37,7 @@ import static com.kstefancic.eurojackpot.domain.Constants.*;
 @Transactional
 public class LotteryServiceImpl implements LotteryService {
 
-    Logger logger = LoggerFactory.getLogger(LotteryServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(LotteryServiceImpl.class);
 
     private final DrawRepository drawRepository;
     private final LotteryRepository lotteryRepository;

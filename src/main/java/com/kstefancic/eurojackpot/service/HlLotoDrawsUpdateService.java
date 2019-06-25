@@ -1,6 +1,5 @@
 package com.kstefancic.eurojackpot.service;
 
-import com.kstefancic.eurojackpot.LotteryUpdateTasks;
 import com.kstefancic.eurojackpot.domain.Draw;
 import com.kstefancic.eurojackpot.domain.Lottery;
 import com.kstefancic.eurojackpot.repository.DrawRepository;
@@ -22,48 +21,46 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.kstefancic.eurojackpot.domain.Constants.LOTO_6_OD_45_UK;
-
 @Service
 @Transactional
-public class Loto6od45Service implements UpdateDrawsService {
+public class HlLotoDrawsUpdateService implements UpdateDrawsService {
 
-    Logger logger = LoggerFactory.getLogger(LotteryUpdateTasks.class);
+    private static final Logger logger = LoggerFactory.getLogger(HlLotoDrawsUpdateService.class);
 
     private final LotteryRepository lotteryRepository;
     private final DrawRepository drawRepository;
 
-    public Loto6od45Service(DrawRepository drawRepository, LotteryRepository lotteryRepository) {
+    public HlLotoDrawsUpdateService(DrawRepository drawRepository, LotteryRepository lotteryRepository) {
         this.drawRepository = drawRepository;
         this.lotteryRepository = lotteryRepository;
     }
 
     @Override
-    public void updateDraws() {
-        Optional<Lottery> lottery = lotteryRepository.findByUniqueName(LOTO_6_OD_45_UK);
+    public void updateDraws(String uniqueLotteryName, String lotteryResultUrl) {
+        Optional<Lottery> lottery = lotteryRepository.findByUniqueName(uniqueLotteryName);
         if (!lottery.isPresent()) {
-            logger.error("Loto 6 od 45 does not exist. It can not be updated");
+            logger.error(uniqueLotteryName + " does not exist. It can not be updated");
         } else {
             LocalDateTime now = LocalDateTime.now();
             LocalDateTime latestDrawTime = drawRepository.latestDrawTime(lottery.get().getId());
             if (latestDrawTime.toLocalDate().isBefore(now.toLocalDate())) {
-                Draw draw = parseNewDrawResult(lottery.get());
+                parseAndSaveNewDrawResult(lottery.get(), lotteryResultUrl);
             } else if (now.getHour() == 23) {
-                logger.error("!!Loto 6 od 45 draw WAS NOT UPDATED today on the source site!!");
+                logger.error("!!" + uniqueLotteryName + " draw WAS NOT UPDATED today on the source site!!");
             } else {
-                logger.info("Loto 6 od 45 was already updated today.");
+                logger.info(uniqueLotteryName + " was already updated today.");
             }
         }
     }
 
-    private Draw parseNewDrawResult(Lottery lottery) {
+    private void parseAndSaveNewDrawResult(Lottery lottery, String lotteryResultUrl) {
         try {
-            Document document = Jsoup.connect("https://www.lutrija.hr/cms/loto6od45").get();
+            Document document = Jsoup.connect(lotteryResultUrl).get();
             String dateStr = document.select("p#date-info span").text();
             String[] parts = dateStr.split(" ");
             LocalDate date = LocalDate.parse(parts[parts.length - 1], DateTimeFormatter.ofPattern("dd.MM.yyyy."));
             if (drawRepository.getByDateAndLotteryId(date.toString(), lottery.getId()).isPresent()) {
-                logger.info("Newest downloaded draw is already present in Loto 6 od 45 draws");
+                logger.info("Newest downloaded draw is already present in " + lottery.getUniqueName() + " draws");
             } else {
                 LocalDateTime time = LocalDateTime.of(date, LocalTime.of(20, 0));
                 List<Integer> numberList = document.select("div#winnings-info li").stream()
@@ -73,11 +70,10 @@ public class Loto6od45Service implements UpdateDrawsService {
                 Draw draw = new Draw(time, numberList.subList(0, lottery.getDraw()), extraNums);
                 draw.setLottery(lottery);
                 drawRepository.save(draw);
-                logger.info("Loto 6 od 45 newest draw successfully saved");
+                logger.info(lottery.getUniqueName() + " newest draw successfully saved");
             }
         } catch (IOException e) {
-            logger.error("Error while connecting or parsing Loto 6 od 45 website");
+            logger.error("Error while connecting or parsing "+ lottery.getUniqueName() + " website", e);
         }
-        return null;
     }
 }
