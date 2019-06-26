@@ -6,6 +6,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,6 +32,7 @@ public class LotteryMasterApplicationTests {
     }
 
     @Test
+    @Ignore
     public void testParsing() throws IOException {
         Instant t1 = Instant.now();
         Map<String, Lottery> lotteries = new HashMap<>();

@@ -107,10 +107,10 @@ public class LotteryServiceImpl implements LotteryService {
 
     private void initializeLoto7od39() {
         try {
-            Lottery lottery7od39 = lotteryRepository.findByUniqueName(LOTO_7_OD_39_UK).orElseGet(() -> {
+            Lottery lottery7od39 = lotteryRepository.findByUniqueName(LOTO_7_OD_35_UK).orElseGet(() -> {
                 Lottery lottery = new Lottery();
-                lottery.setName(LOTO_7_OD_39);
-                lottery.setUniqueName(LOTO_7_OD_39_UK);
+                lottery.setName(LOTO_7_OD_35);
+                lottery.setUniqueName(LOTO_7_OD_35_UK);
                 lottery.setMaxNumber(39);
                 lottery.setDraw(7);
                 lottery.setExtraDraw(1);

@@ -76,4 +76,12 @@ public class DrawController {
     ){
         return ResponseEntity.ok(statisticsService.lotteryMostCommon(lotteryId, quantity, draws, extraQuantity));
     }
+
+    @GetMapping("/{id}/calculate")
+    public ResponseEntity<?> getNextDrawNumberCoefficients(
+            @PathVariable("id") int lotteryId,
+            @RequestParam("draws") int draws
+    ){
+        return ResponseEntity.ok(statisticsService.nextDrawNumberCoefficients(lotteryId, draws));
+    }
 }

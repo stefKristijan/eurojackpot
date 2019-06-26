@@ -5,6 +5,8 @@ import com.kstefancic.eurojackpot.domain.NumberStatistics;
 import com.kstefancic.eurojackpot.domain.RangeStatistics;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+
 @Service
 public interface StatisticsService {
 
@@ -13,4 +15,6 @@ public interface StatisticsService {
     RangeStatistics lotteryTensStats(int lotteryId, Integer draws, Integer range, Integer extraRange);
 
     MostCommonStatistics lotteryMostCommon(int lotteryId, int quantity, Integer draws, int extraQuantity);
+
+    Map<Integer, Double> nextDrawNumberCoefficients(int lotteryId, int draws);
 }

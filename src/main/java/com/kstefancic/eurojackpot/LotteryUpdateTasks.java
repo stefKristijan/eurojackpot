@@ -26,25 +26,25 @@ public class LotteryUpdateTasks {
         this.eurojackpotDrawsService = eurojackpotDrawsService;
     }
 
-    @PostConstruct
+//    @PostConstruct
     private void initializeLotteries() {
         logger.info("Initializing lotteries that are not yet initialized");
         lotteryService.initializeLotteries();
     }
 
-    @Scheduled(cron = "* */30 20-23 * * 0,4")
+    @Scheduled(cron = "0 0/30 20-23 * * 0,4")
     public void updateLoto6od45() {
         logger.info("Updating " + LOTO_6_OD_45_UK + " draws");
         hlLotoDrawsService.updateDraws(LOTO_6_OD_45_UK, LOTO_6_OD_45_URL);
     }
 
-    @Scheduled(cron = "* */30 20-23 * * 3,6")
+    @Scheduled(cron = "0 0/30 20-23 * * 3,6")
     public void updateLoto7od39() {
-        logger.info("Updating " + LOTO_7_OD_39_UK + " draws");
-        hlLotoDrawsService.updateDraws(LOTO_7_OD_39_UK, LOTO_7_OD_39_URL);
+        logger.info("Updating " + LOTO_7_OD_35_UK + " draws");
+        hlLotoDrawsService.updateDraws(LOTO_7_OD_35_UK, LOTO_7_OD_35_URL);
     }
 
-    @Scheduled(cron = "* 0 0 * * 6")
+    @Scheduled(cron = "0 0 0 * * 6")
     public void updateEurojackpot(){
         logger.info("Updating Eurojackpot draws");
         eurojackpotDrawsService.updateDraws();
