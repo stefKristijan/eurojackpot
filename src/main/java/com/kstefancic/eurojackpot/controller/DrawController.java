@@ -80,8 +80,14 @@ public class DrawController {
     @GetMapping("/{id}/calculate")
     public ResponseEntity<?> getNextDrawNumberCoefficients(
             @PathVariable("id") int lotteryId,
-            @RequestParam("draws") int draws
+            @RequestParam(value = "draws", required = false) Integer draws,
+            @RequestParam(value = "maxDraws", required = false) Integer maxDraws,
+            @RequestParam(value = "rangeMultiplier", required = false) Double rangeMultiplier,
+            @RequestParam(value = "mcMultiplier", required = false) Double mcMultiplier,
+            @RequestParam(value = "drawnMultiplier", required = false) Double drawnMultiplier,
+            @RequestParam(value = "range", required = false) Integer range
     ){
-        return ResponseEntity.ok(statisticsService.nextDrawNumberCoefficients(lotteryId, draws));
+        return ResponseEntity.ok(statisticsService.nextDrawNumberCoefficients(lotteryId, draws, maxDraws, rangeMultiplier, mcMultiplier, drawnMultiplier, range));
     }
+
 }
