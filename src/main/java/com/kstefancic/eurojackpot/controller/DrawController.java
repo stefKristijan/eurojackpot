@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Comparator;
 import java.util.List;
 
 @RestController
@@ -38,6 +39,7 @@ public class DrawController {
             l.setDraws(null);
             l.setResultUrls(null);
         });
+        all.sort(Comparator.comparing(Lottery::getName));
         return ResponseEntity.ok(all);
     }
 

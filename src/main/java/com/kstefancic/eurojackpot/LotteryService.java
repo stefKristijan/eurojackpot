@@ -12,8 +12,6 @@ public interface LotteryService {
 
     List<Lottery> findAll();
 
-    Draw calculateDraw();
-
     List<Draw> findByLottery(Integer lotteryId, Pageable pageRequest);
 
     Lottery findById(Integer lotteryId);

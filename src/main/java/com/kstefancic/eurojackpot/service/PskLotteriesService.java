@@ -60,8 +60,7 @@ public class PskLotteriesService {
                         List<Integer> numbers = Arrays.stream(
                             row.select(".cell.winning").text().split(",")).map(Integer::parseInt).collect(Collectors.toList()
                         );
-                        //TODO - remove ČĐ replacement on production
-                        String uniqueName = name.replaceAll("\\s+", "").replaceAll("[čđČĐ]","?");
+                        String uniqueName = name.replaceAll("\\s+", "");
                         Optional<Lottery> lottery = allLotteries.stream().filter(l -> l.getUniqueName().equals(uniqueName)).findFirst();
                         if (lottery.isPresent()) {
                             if (!drawRepository.findByTimeAndLotteryId(time, lottery.get().getId()).isPresent()) {

@@ -169,7 +169,7 @@ public class LotteryServiceImpl implements LotteryService {
             });
             LocalDateTime time = drawRepository.latestDrawTime(lottery.getId());
             if (time == null) {
-                time = LocalDateTime.of(2012, 1, 1, 20, 0);
+                time = LocalDateTime.of(2015, 1, 1, 20, 0);
             }
             for (int year = time.getYear(); year <= LocalDate.now().getYear(); year++) {
                 documents.add(Jsoup.connect(
@@ -239,15 +239,6 @@ public class LotteryServiceImpl implements LotteryService {
     @Override
     public List<Lottery> findAll() {
         return lotteryRepository.findAll();
-    }
-
-    @Override
-    public Draw calculateDraw() {
-        List<Integer> nums = new ArrayList<>();
-        List<Integer> extraNums = new ArrayList<>();
-
-
-        return null;
     }
 
     @Override
