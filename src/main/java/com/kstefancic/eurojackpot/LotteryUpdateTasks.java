@@ -2,12 +2,11 @@ package com.kstefancic.eurojackpot;
 
 import com.kstefancic.eurojackpot.service.EurojackpotDrawsService;
 import com.kstefancic.eurojackpot.service.HlLotoDrawsService;
+import com.kstefancic.eurojackpot.service.PskLotteriesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
 
 import static com.kstefancic.eurojackpot.domain.Constants.*;
 
@@ -19,11 +18,13 @@ public class LotteryUpdateTasks {
     private final HlLotoDrawsService hlLotoDrawsService;
     private final LotteryService lotteryService;
     private final EurojackpotDrawsService eurojackpotDrawsService;
+    private final PskLotteriesService pskLotteriesService;
 
-    public LotteryUpdateTasks(HlLotoDrawsService hlLotoDrawsService, LotteryService lotteryService, EurojackpotDrawsService eurojackpotDrawsService) {
+    public LotteryUpdateTasks(HlLotoDrawsService hlLotoDrawsService, LotteryService lotteryService, EurojackpotDrawsService eurojackpotDrawsService, PskLotteriesService pskLotteriesService) {
         this.hlLotoDrawsService = hlLotoDrawsService;
         this.lotteryService = lotteryService;
         this.eurojackpotDrawsService = eurojackpotDrawsService;
+        this.pskLotteriesService = pskLotteriesService;
     }
 
 //    @PostConstruct
@@ -48,5 +49,11 @@ public class LotteryUpdateTasks {
     public void updateEurojackpot(){
         logger.info("Updating Eurojackpot draws");
         eurojackpotDrawsService.updateDraws();
+    }
+
+    @Scheduled(cron = "0 0/15 * * * *")
+    public void updatePskLotteries(){
+        logger.info("Updating PSK lotteries");
+        pskLotteriesService.updateDraws();
     }
 }

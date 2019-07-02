@@ -34,7 +34,7 @@ public class Lottery {
 
     public Lottery(String name, String uniqueName, int draw, int maxNumber){
         this.name = name;
-        this.uniqueName = name;
+        this.uniqueName = uniqueName;
         this.draw = draw;
         this.maxNumber = maxNumber;
     }

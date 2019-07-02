@@ -28,6 +28,8 @@ public interface DrawRepository extends JpaRepository<Draw, Long> {
     )
     Optional<Draw> getByDateAndLotteryId(String date, int lotteryId);
 
+    Optional<Draw> findByTimeAndLotteryId(LocalDateTime time, int lotteryId);
+
     @Query("select d from Draw d order by d.time desc")
     List<Draw> listAllByTimeDesc();
 

@@ -4,6 +4,7 @@ import com.kstefancic.eurojackpot.LotteryService;
 import com.kstefancic.eurojackpot.domain.Constants;
 import com.kstefancic.eurojackpot.service.EurojackpotDrawsService;
 import com.kstefancic.eurojackpot.service.HlLotoDrawsHlLotoService;
+import com.kstefancic.eurojackpot.service.PskLotteriesService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,9 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class UpdateController {
 
     private final LotteryService lotteryService;
-    private final EurojackpotDrawsService service;
+    private final PskLotteriesService service;
 
-    public UpdateController(LotteryService lotteryService, EurojackpotDrawsService service) {
+    public UpdateController(LotteryService lotteryService, PskLotteriesService service) {
         this.lotteryService = lotteryService;
         this.service = service;
     }
