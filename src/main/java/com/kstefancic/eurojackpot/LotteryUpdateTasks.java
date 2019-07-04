@@ -1,7 +1,8 @@
 package com.kstefancic.eurojackpot;
 
 import com.kstefancic.eurojackpot.service.EurojackpotDrawsService;
-import com.kstefancic.eurojackpot.service.HlLotoDrawsService;
+import com.kstefancic.eurojackpot.service.GermaniaLotteriesService;
+import com.kstefancic.eurojackpot.service.HlLotteriesDrawsService;
 import com.kstefancic.eurojackpot.service.PskLotteriesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,16 +16,18 @@ public class LotteryUpdateTasks {
 
     private static final Logger logger = LoggerFactory.getLogger(LotteryUpdateTasks.class);
 
-    private final HlLotoDrawsService hlLotoDrawsService;
+    private final HlLotteriesDrawsService hlLotteriesDrawsService;
     private final LotteryService lotteryService;
     private final EurojackpotDrawsService eurojackpotDrawsService;
     private final PskLotteriesService pskLotteriesService;
+    private final GermaniaLotteriesService germaniaLotteriesService;
 
-    public LotteryUpdateTasks(HlLotoDrawsService hlLotoDrawsService, LotteryService lotteryService, EurojackpotDrawsService eurojackpotDrawsService, PskLotteriesService pskLotteriesService) {
-        this.hlLotoDrawsService = hlLotoDrawsService;
+    public LotteryUpdateTasks(HlLotteriesDrawsService hlLotteriesDrawsService, LotteryService lotteryService, EurojackpotDrawsService eurojackpotDrawsService, PskLotteriesService pskLotteriesService, GermaniaLotteriesService germaniaLotteriesService) {
+        this.hlLotteriesDrawsService = hlLotteriesDrawsService;
         this.lotteryService = lotteryService;
         this.eurojackpotDrawsService = eurojackpotDrawsService;
         this.pskLotteriesService = pskLotteriesService;
+        this.germaniaLotteriesService = germaniaLotteriesService;
     }
 
 //    @PostConstruct
@@ -36,13 +39,13 @@ public class LotteryUpdateTasks {
     @Scheduled(cron = "0 0/30 20-23 * * 0,4")
     public void updateLoto6od45() {
         logger.info("Updating " + LOTO_6_OD_45_UK + " draws");
-        hlLotoDrawsService.updateDraws(LOTO_6_OD_45_UK, LOTO_6_OD_45_URL);
+        hlLotteriesDrawsService.updateDraws(LOTO_6_OD_45_UK, LOTO_6_OD_45_URL);
     }
 
     @Scheduled(cron = "0 0/30 20-23 * * 3,6")
     public void updateLoto7od39() {
         logger.info("Updating " + LOTO_7_OD_35_UK + " draws");
-        hlLotoDrawsService.updateDraws(LOTO_7_OD_35_UK, LOTO_7_OD_35_URL);
+        hlLotteriesDrawsService.updateDraws(LOTO_7_OD_35_UK, LOTO_7_OD_35_URL);
     }
 
     @Scheduled(cron = "0 0 0 * * 6")
@@ -55,5 +58,17 @@ public class LotteryUpdateTasks {
     public void updatePskLotteries(){
         logger.info("Updating PSK lotteries");
         pskLotteriesService.updateDraws();
+    }
+
+    @Scheduled(cron = "0/30 * * * * *")
+    public void updateGreekKenoAndItalianKino(){
+        logger.info("Updating Germania lotteries");
+        germaniaLotteriesService.updateDraws();
+    }
+
+    @Scheduled(cron = "0 0 0 * * *")
+    public void deleteOldGreekKenoAndItalianKinoData(){
+        logger.info("Deleting germania lotteries from 2 days ago");
+        germaniaLotteriesService.delete2DaysAgoLotteries();
     }
 }

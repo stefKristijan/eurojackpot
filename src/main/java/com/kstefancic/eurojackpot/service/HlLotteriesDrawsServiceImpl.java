@@ -23,14 +23,14 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
-public class HlLotoDrawsHlLotoService implements HlLotoDrawsService {
+public class HlLotteriesDrawsServiceImpl implements HlLotteriesDrawsService {
 
-    private static final Logger logger = LoggerFactory.getLogger(HlLotoDrawsHlLotoService.class);
+    private static final Logger logger = LoggerFactory.getLogger(HlLotteriesDrawsServiceImpl.class);
 
     private final LotteryRepository lotteryRepository;
     private final DrawRepository drawRepository;
 
-    public HlLotoDrawsHlLotoService(DrawRepository drawRepository, LotteryRepository lotteryRepository) {
+    public HlLotteriesDrawsServiceImpl(DrawRepository drawRepository, LotteryRepository lotteryRepository) {
         this.drawRepository = drawRepository;
         this.lotteryRepository = lotteryRepository;
     }

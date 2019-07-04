@@ -15,6 +15,7 @@ import com.kstefancic.eurojackpot.domain.Draw;
 import com.kstefancic.eurojackpot.domain.Lottery;
 import com.kstefancic.eurojackpot.repository.DrawRepository;
 import com.kstefancic.eurojackpot.repository.LotteryRepository;
+import org.apache.tomcat.jni.Local;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -44,11 +45,14 @@ public class PskLotteriesService {
         try {
             List<Lottery> allLotteries = lotteryRepository.findAll();
             allLotteries.removeIf(l -> l.getUniqueName().equals(LOTO_6_OD_45_UK) ||
-                l.getUniqueName().equals(LOTO_7_OD_35_UK) || l.getUniqueName().equals(EUROJACKPOT));
+                l.getUniqueName().equals(LOTO_7_OD_35_UK) || l.getUniqueName().equals(EUROJACKPOT)
+            || l.getUniqueName().equals(GRCKI_KINO_UK) || l.getUniqueName().equals(TALIJANSKI_KENO_UK));
 
             LocalDate date = LocalDate.now();
+            LocalDate sixMonthsAgo = LocalDate.now().minusMonths(6);
+            int drawsAdded = 0;
 
-            while (allLotteries.size() > 0) {
+            while (allLotteries.size() > 0 || date.isBefore(sixMonthsAgo)) {
                 Document document = Jsoup.connect(String.format("https://www.psk.hr/Results/Lotto?date=%s", date.toString())).get();
                 Elements rows = document.select(".result-row");
                 for (int i = rows.size() - 1; i >= 0; i--) {
@@ -67,6 +71,7 @@ public class PskLotteriesService {
                                 Draw d = new Draw(time, numbers);
                                 d.setLottery(lottery.get());
                                 lottery.get().addDraw(d);
+                                drawsAdded++;
                             } else {
                                 allLotteries.removeIf(l -> l.getId().equals(lottery.get().getId()));
                             }
@@ -75,6 +80,7 @@ public class PskLotteriesService {
                 }
                 date = date.minusDays(1);
             }
+            logger.info("Added {} draws from PSK results", drawsAdded);
         } catch (Exception e) {
             logger.error("Lotteries from PSK were not updated successfully!", e);
         }
