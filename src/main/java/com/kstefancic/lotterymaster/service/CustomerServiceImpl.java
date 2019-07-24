@@ -30,9 +30,6 @@ public class CustomerServiceImpl implements CustomerService {
     @Value("${secret.key}")
     private String API_KEY;
 
-    @Value("${product.ticket.id}")
-    private String PRODUCT_ID;
-
     private final UserRepository userRepository;
     @Autowired
     @Lazy
@@ -84,6 +81,7 @@ public class CustomerServiceImpl implements CustomerService {
 
             Order order = Order.create(orderParams);
             Map<String, Object> params = new HashMap<>();
+            params.put("receipt_email", user.getEmail());
             params.put("source", token);
             order.pay(params);
 
