@@ -13,6 +13,7 @@ import com.kstefancic.lotterymaster.repository.UserRepository;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.*;
+import com.stripe.param.PaymentIntentCreateParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -31,13 +32,13 @@ public class CustomerServiceImpl implements CustomerService {
     private String API_KEY;
 
     private final UserRepository userRepository;
-    @Autowired
+
     @Lazy
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     public CustomerServiceImpl(UserRepository UserRepository) {
         this.userRepository = UserRepository;
-
     }
 
     @Override
@@ -63,54 +64,6 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public User charge(String token, String sku) {
-        Stripe.apiKey = API_KEY;
-        User user = userRepository.findById(SecurityContextHolder.getContext().getAuthentication().getName())
-                .orElseThrow(() -> new EntityNotFoundException("No user authenticated"));
-        Map<String, Object> orderParams = new HashMap<String, Object>();
-        orderParams.put("currency", "EUR");
-        orderParams.put("email", user.getEmail());
-        Map<String, String> item = new HashMap<>();
-        item.put("type", "sku");
-        item.put("parent", sku);
-        List<Object> itemsParams = new LinkedList<Object>();
-        itemsParams.add(item);
-        orderParams.put("items", itemsParams);
-        try {
-            Sku retrieve = Sku.retrieve(sku);
-
-            Order order = Order.create(orderParams);
-            Map<String, Object> params = new HashMap<>();
-            params.put("receipt_email", user.getEmail());
-            params.put("source", token);
-            order.pay(params);
-
-            Map<String, Object> updateStatusParams = new HashMap<>();
-            updateStatusParams.put("status", "fulfilled");
-            order.update(updateStatusParams);
-            user.setGeneratesLeft(user.getGeneratesLeft() + Integer.parseInt(retrieve.getAttributes().get("amount")));
-            return user;
-        } catch (StripeException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    @Override
-    public List<Sku> getTickets() {
-        Stripe.apiKey = API_KEY;
-        Map<String, Object> skuParams = new HashMap<>();
-        skuParams.put("limit", "5");
-
-        try {
-            return Sku.list(skuParams).getData();
-        } catch (StripeException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
         return userRepository.findByEmail(s)
                 .map(this::getUserDetails)
@@ -128,4 +81,5 @@ public class CustomerServiceImpl implements CustomerService {
                 Collections.emptyList()
         );
     }
+
 }

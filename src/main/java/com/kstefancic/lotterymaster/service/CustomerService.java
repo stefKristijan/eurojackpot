@@ -5,6 +5,7 @@ import com.stripe.model.Sku;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.List;
+import java.util.Map;
 
 public interface CustomerService extends UserDetailsService {
 
@@ -15,8 +16,4 @@ public interface CustomerService extends UserDetailsService {
      * @return
      */
     User create(User user);
-
-    User charge(String token, String sku);
-
-    List<Sku> getTickets();
 }

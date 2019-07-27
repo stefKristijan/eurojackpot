@@ -21,7 +21,7 @@ public class User {
     @NotBlank
     @Column(nullable = false)
     private String password;
-    private int generatesLeft = 0;
+    private int generatesLeft = 2;
 
     public String getId() {
         return id;
