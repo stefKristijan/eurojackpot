@@ -1,5 +1,6 @@
 package com.kstefancic.lotterymaster.service;
 
+import com.kstefancic.lotterymaster.api.PaymentException;
 import com.kstefancic.lotterymaster.domain.TicketOrder;
 import com.kstefancic.lotterymaster.domain.User;
 import com.kstefancic.lotterymaster.repository.UserRepository;
@@ -64,9 +65,8 @@ public class StripeServiceImpl implements StripeService {
         } catch (StripeException e) {
             handleInvoice(invoice);
             e.printStackTrace();
+            throw new PaymentException(e.getCode(), e.getMessage(), e);
         }
-
-        return null;
     }
 
     private void handleInvoice(Invoice invoice) {
@@ -80,6 +80,7 @@ public class StripeServiceImpl implements StripeService {
             }
         } catch (StripeException ex) {
             ex.printStackTrace();
+            throw new PaymentException(ex.getCode(), ex.getMessage(), ex);
         }
     }
 
@@ -113,7 +114,7 @@ public class StripeServiceImpl implements StripeService {
             if (intent != null)
                 handleInvoice(intent.getInvoiceObject());
             e.printStackTrace();
+            throw new PaymentException(e.getCode(), e.getMessage(), e);
         }
-        return null;
     }
 }
