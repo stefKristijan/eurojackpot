@@ -44,7 +44,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(customerService)
-            .passwordEncoder(passwordEncoder());
+                .passwordEncoder(passwordEncoder());
     }
 
     @Override
@@ -57,8 +57,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests()
                 .antMatchers("/api/payment/**").authenticated()
                 .antMatchers("/api/lottery/*/calculate").authenticated()
-                .antMatchers(HttpMethod.POST, "/api/customer").permitAll()
-            .antMatchers( "/**").permitAll();
+                .antMatchers("/api/auth").authenticated()
+                .antMatchers("/**").permitAll();
 
         http
                 .formLogin()
