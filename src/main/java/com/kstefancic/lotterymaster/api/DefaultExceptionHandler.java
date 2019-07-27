@@ -16,8 +16,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import javax.persistence.EntityNotFoundException;
 import javax.xml.bind.ValidationException;
-import java.util.ArrayList;
-import java.util.List;
 
 @ControllerAdvice(annotations = RestController.class)
 public class DefaultExceptionHandler extends ResponseEntityExceptionHandler {
@@ -29,15 +27,8 @@ public class DefaultExceptionHandler extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(ex, apiError, new HttpHeaders(), HttpStatus.NOT_FOUND, request);
     }
 
-    //500
-    @ExceptionHandler({Exception.class})
-    public ResponseEntity<Object> handleServerError(final Exception ex, final WebRequest request) {
-        final ApiError apiError = new ApiError("unknown-error", ex.getMessage(), ex.getClass().getSimpleName());
-        return handleExceptionInternal(ex, apiError, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
-    }
-
     // 400
-    @ExceptionHandler({ ValidationException.class})
+    @ExceptionHandler({ ValidationException.class, javax.validation.ValidationException.class})
     protected ResponseEntity<Object> handleBadRequest(final RuntimeException ex, final WebRequest request) {
         final ApiError apiError = new ApiError("validation-error", ex.getMessage(), ex.getClass().getSimpleName());
         return handleExceptionInternal(ex, apiError, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
@@ -55,6 +46,12 @@ public class DefaultExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleForbiddenRequest(final RuntimeException ex, final WebRequest request) {
         final ApiError apiError = new ApiError("access-denied", ex.getMessage(), ex.getClass().getSimpleName());
         return handleExceptionInternal(ex, apiError, new HttpHeaders(), HttpStatus.FORBIDDEN, request);
+    }
+    //500
+    @ExceptionHandler({Exception.class})
+    public ResponseEntity<Object> handleServerError(final Exception ex, final WebRequest request) {
+        final ApiError apiError = new ApiError("unknown-error", ex.getMessage(), ex.getClass().getSimpleName());
+        return handleExceptionInternal(ex, apiError, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
     }
 
 }

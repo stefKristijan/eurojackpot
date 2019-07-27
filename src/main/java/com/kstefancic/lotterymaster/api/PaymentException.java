@@ -1,7 +1,5 @@
 package com.kstefancic.lotterymaster.api;
 
-import com.stripe.param.PaymentIntentUpdateParams;
-
 public class PaymentException extends RuntimeException {
 
     private final String code;

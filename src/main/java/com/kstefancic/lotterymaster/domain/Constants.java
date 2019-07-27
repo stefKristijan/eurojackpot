@@ -17,4 +17,6 @@ public interface Constants {
     String TALIJANSKI_KENO = "Italija 10e";
     String TALIJANSKI_KENO_UK = "Italija10e20/90";
     String EUROJACKPOT = "Eurojackpot";
+
+
 }

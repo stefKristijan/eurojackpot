@@ -1,5 +1,7 @@
 package com.kstefancic.lotterymaster.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -22,6 +24,27 @@ public class User {
     @Column(nullable = false)
     private String password;
     private int generatesLeft = 2;
+
+    private boolean enabled = false;
+
+    @JsonIgnore
+    private String verificationCode;
+
+    public String getVerificationCode() {
+        return verificationCode;
+    }
+
+    public void setVerificationCode(String verificationCode) {
+        this.verificationCode = verificationCode;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 
     public String getId() {
         return id;

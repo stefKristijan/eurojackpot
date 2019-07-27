@@ -16,4 +16,8 @@ public interface CustomerService extends UserDetailsService {
      * @return
      */
     User create(User user);
+
+    void verifyUser(String email, String code);
+
+    void resendVerificationCode(String email, String password);
 }
