@@ -8,6 +8,12 @@ public class NumberCoefficient {
     private double drawnCoefficient = 0;
     private double coefficientSum;
 
+    public NumberCoefficient(int number){
+        this.number = number;
+        this.mcCoefficient = 0;
+        this.coefficientSum = 0;
+    }
+
     public NumberCoefficient(int number, double mcCoefficient){
         this.number = number;
         this.mcCoefficient = mcCoefficient;

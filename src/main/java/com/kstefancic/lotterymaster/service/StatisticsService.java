@@ -3,8 +3,6 @@ package com.kstefancic.lotterymaster.service;
 import com.kstefancic.lotterymaster.domain.*;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 public interface StatisticsService {
 
@@ -14,6 +12,6 @@ public interface StatisticsService {
 
     MostCommonStatistics lotteryMostCommon(int lotteryId, int quantity, Integer draws, int extraQuantity);
 
-    List<NumberCoefficient> nextDrawNumberCoefficients(int lotteryId, Generator generator);
+    CoefficientStatistics nextDrawNumberCoefficients(int lotteryId, Generator generator);
 
 }
