@@ -1,5 +1,6 @@
 package com.kstefancic.lotterymaster.controller;
 
+import com.kstefancic.lotterymaster.domain.Generator;
 import com.kstefancic.lotterymaster.service.LotteryService;
 import com.kstefancic.lotterymaster.service.StatisticsService;
 import com.kstefancic.lotterymaster.domain.Lottery;
@@ -7,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.Comparator;
 import java.util.List;
 
@@ -33,7 +35,7 @@ public class DrawController {
     }
 
     @GetMapping("")
-    public ResponseEntity<?> lotteryList(){
+    public ResponseEntity<?> lotteryList() {
         List<Lottery> all = lotteryService.findAll();
         all.forEach(l -> {
             l.setDraws(null);
@@ -55,7 +57,7 @@ public class DrawController {
     public ResponseEntity<?> lotteryNumberStats(
             @PathVariable("id") int lotteryId,
             @RequestParam(name = "draws", required = false) Integer draws
-    ){
+    ) {
         return ResponseEntity.ok(statisticsService.lotteryNumberStats(lotteryId, draws));
     }
 
@@ -65,7 +67,7 @@ public class DrawController {
             @RequestParam(name = "draws", required = false) Integer draws,
             @RequestParam(name = "range", required = false) Integer range,
             @RequestParam(name = "extraRange", required = false) Integer extraRange
-    ){
+    ) {
         return ResponseEntity.ok(statisticsService.lotteryTensStats(lotteryId, draws, range, extraRange));
     }
 
@@ -75,23 +77,16 @@ public class DrawController {
             @RequestParam(name = "draws", required = false) Integer draws,
             @RequestParam("quantity") int quantity,
             @RequestParam("extraQuantity") int extraQuantity
-    ){
+    ) {
         return ResponseEntity.ok(statisticsService.lotteryMostCommon(lotteryId, quantity, draws, extraQuantity));
     }
 
-    @GetMapping("/{id}/calculate")
+    @PostMapping("/{id}/calculate")
     public ResponseEntity<?> getNextDrawNumberCoefficients(
             @PathVariable("id") int lotteryId,
-            @RequestParam(value = "draws", required = false) Integer draws,
-            @RequestParam(value = "maxDraws", required = false) Integer maxDraws,
-            @RequestParam(value = "rangeMultiplier", required = false) Double rangeMultiplier,
-            @RequestParam(value = "mcMultiplier", required = false) Double mcMultiplier,
-            @RequestParam(value = "drawnMultiplier", required = false) Double drawnMultiplier,
-            @RequestParam(value = "lastDrawDivider", required = false) Double lastDrawDivider,
-            @RequestParam(value = "range", required = false) Integer range
-    ){
-        return ResponseEntity.ok(statisticsService.nextDrawNumberCoefficients(lotteryId, draws, maxDraws,
-            rangeMultiplier, mcMultiplier, drawnMultiplier, range, lastDrawDivider));
+            @RequestBody @Valid Generator generator
+            ) {
+        return ResponseEntity.ok(statisticsService.nextDrawNumberCoefficients(lotteryId, generator));
     }
 
 }

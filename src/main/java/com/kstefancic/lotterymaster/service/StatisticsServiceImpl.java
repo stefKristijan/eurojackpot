@@ -3,17 +3,20 @@ package com.kstefancic.lotterymaster.service;
 import com.kstefancic.lotterymaster.domain.*;
 import com.kstefancic.lotterymaster.repository.DrawRepository;
 import com.kstefancic.lotterymaster.repository.LotteryRepository;
+import com.kstefancic.lotterymaster.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.PersistenceContext;
+import javax.validation.ValidationException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -25,21 +28,23 @@ import java.util.Map;
 public class StatisticsServiceImpl implements StatisticsService {
 
     private static final Logger logger = LoggerFactory.getLogger(StatisticsServiceImpl.class);
-    final private LotteryRepository lotteryRepository;
-    final private DrawRepository drawRepository;
+    private final LotteryRepository lotteryRepository;
+    private final DrawRepository drawRepository;
+    private final UserRepository userRepository;
 
     @PersistenceContext
     private EntityManager em;
 
-    public StatisticsServiceImpl(LotteryRepository lotteryRepository, DrawRepository drawRepository) {
+    public StatisticsServiceImpl(LotteryRepository lotteryRepository, DrawRepository drawRepository, UserRepository userRepository) {
         this.lotteryRepository = lotteryRepository;
         this.drawRepository = drawRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
     public NumberStatistics lotteryNumberStats(int lotteryId, Integer draws) {
         Lottery lottery = lotteryRepository.findById(lotteryId)
-            .orElseThrow(() -> new EntityNotFoundException(Constants.NOT_FOUND_LOTTERY));
+                .orElseThrow(() -> new EntityNotFoundException(Constants.NOT_FOUND_LOTTERY));
         Pageable pageable = PageRequest.of(0, draws != null && draws > 0 ? draws : Integer.MAX_VALUE, Sort.by("time").descending());
         List<Draw> drawList = drawRepository.findAllByLotteryId(lotteryId, pageable);
         NumberStatistics numberStatistics = new NumberStatistics(drawList.size(), lottery);
@@ -52,7 +57,7 @@ public class StatisticsServiceImpl implements StatisticsService {
     @Override
     public RangeStatistics lotteryTensStats(int lotteryId, Integer draws, Integer range, Integer extraRange) {
         Lottery lottery = lotteryRepository.findById(lotteryId)
-            .orElseThrow(() -> new EntityNotFoundException(Constants.NOT_FOUND_LOTTERY));
+                .orElseThrow(() -> new EntityNotFoundException(Constants.NOT_FOUND_LOTTERY));
         draws = draws != null && draws > 0 ? draws : Integer.MAX_VALUE;
         range = range != null && range > 1 ? range : lottery.getDraw();
         extraRange = extraRange != null && extraRange > 1 ? extraRange : lottery.getExtraDraw();
@@ -72,7 +77,7 @@ public class StatisticsServiceImpl implements StatisticsService {
     @Override
     public MostCommonStatistics lotteryMostCommon(int lotteryId, int quantity, Integer draws, int extraQuantity) {
         Lottery lottery = lotteryRepository.findById(lotteryId)
-            .orElseThrow(() -> new EntityNotFoundException(Constants.NOT_FOUND_LOTTERY));
+                .orElseThrow(() -> new EntityNotFoundException(Constants.NOT_FOUND_LOTTERY));
         if (quantity < 2 || quantity > lottery.getDraw()) {
             quantity = 2;
         }
@@ -89,38 +94,82 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     @Override
-    public List<NumberCoefficient> nextDrawNumberCoefficients(int lotteryId, Integer draws, Integer maxDraws, Double rangeMultiplier, Double mcMultiplier, Double drawnMultiplier, Integer range, Double lastDrawDivider) {
+    public List<NumberCoefficient> nextDrawNumberCoefficients(int lotteryId, Generator generator) {
+        User user = userRepository.findById(SecurityContextHolder.getContext().getAuthentication().getName())
+                .orElseThrow(() -> new EntityNotFoundException("No such user"));
         Lottery lottery = lotteryRepository.findById(lotteryId)
-            .orElseThrow(() -> new EntityNotFoundException(Constants.NOT_FOUND_LOTTERY));
+                .orElseThrow(() -> new EntityNotFoundException(Constants.NOT_FOUND_LOTTERY));
         List<NumberCoefficient> coefficients = new ArrayList<>();
 
-        draws = draws == null || draws < 10 || draws >= lottery.getDraws().size() - 10 ? 10 : draws;
-        maxDraws = maxDraws == null || maxDraws <= draws ? lottery.getDraws().size() : maxDraws;
-        range = range == null || range < 2 || range > lottery.getMaxNumber() / lottery.getDraw() ? lottery.getMaxNumber() / lottery.getDraw() : range;
-        rangeMultiplier = rangeMultiplier == null || rangeMultiplier < 0 ? 1.0 : rangeMultiplier;
-        mcMultiplier = mcMultiplier == null || mcMultiplier < 0 ? 1.0 : mcMultiplier;
-        drawnMultiplier = drawnMultiplier == null || drawnMultiplier < 0 ? 1.0 : drawnMultiplier;
+        validateGeneratesLeft(generator.getType(), user.getGeneratesLeft());
+
+        int draws = generator.getDraws() == null || generator.getDraws() < 10 || generator.getDraws() >= lottery.getDraws().size() - 10 ? 10 : generator.getDraws();
+        int maxDraws = generator.getMaxDraws() == null || generator.getMaxDraws() <= draws ? lottery.getDraws().size() : generator.getMaxDraws();
+        int range = generator.getRange() == null || generator.getRange() < 2 || generator.getRange() > lottery.getMaxNumber() / lottery.getDraw() ? lottery.getMaxNumber() / lottery.getDraw() : generator.getRange();
 
         NumberStatistics statsForDraws = lotteryNumberStats(lotteryId, draws);
         NumberStatistics statsForAll = lotteryNumberStats(lotteryId, maxDraws);
 
-        calculatePairCoefficient(lottery, draws, maxDraws, mcMultiplier).forEach((k, v) -> coefficients.add(new NumberCoefficient(k, v)));
+        calculatePairCoefficient(lottery, draws, maxDraws, generator.getMcMultiplier()).forEach((k, v) -> coefficients.add(new NumberCoefficient(k, v)));
 
-        Map<Integer, Double> rangeCoefficient = calculateRangeCoefficient(lottery, draws, maxDraws, range, rangeMultiplier, statsForDraws, statsForAll);
+        Map<Integer, Double> rangeCoefficient = calculateRangeCoefficient(lottery, draws, maxDraws, range, generator.getRangeMultiplier(), statsForDraws, statsForAll);
         coefficients.forEach(nc -> nc.addRangeCoefficient(rangeCoefficient.get(nc.getNumber())));
 
-        Map<Integer, Double> drawnCoefficients = calculateDrawnCoefficients(statsForDraws, statsForAll, draws, drawnMultiplier, maxDraws, lottery);
+        Map<Integer, Double> drawnCoefficients = calculateDrawnCoefficients(statsForDraws, statsForAll, draws, generator.getDrawnMultiplier(), maxDraws, lottery);
         coefficients.forEach(nc -> nc.addDrawnCoefficient(drawnCoefficients.get(nc.getNumber())));
 
         coefficients.forEach(nc -> {
             if (statsForDraws.getStats().stream().anyMatch(s -> s.getNumber() == nc.getNumber() && s.getCyclesNotDrawn() == 0)) {
                 nc.setCoefficientSum(nc.getCoefficientSum() /
-                    (lastDrawDivider == null || lastDrawDivider <= 0 ? 2 : lastDrawDivider));
+                        (generator.getLastDrawDivider() == null || generator.getLastDrawDivider() <= 0 ? 2 : generator.getLastDrawDivider()));
             }
         });
+        switch (generator.getSort()) {
+            case MC:
+                coefficients.sort(Comparator.comparing(NumberCoefficient::getMcCoefficient).reversed());
+                break;
+            case DRAWS:
+                coefficients.sort(Comparator.comparing(NumberCoefficient::getDrawnCoefficient).reversed());
+                break;
+            case RANGE:
+                coefficients.sort(Comparator.comparing(NumberCoefficient::getRangeCoefficient).reversed());
+                break;
+            default:
+                coefficients.sort(Comparator.comparing(NumberCoefficient::getCoefficientSum).reversed());
+        }
+        List<NumberCoefficient> result;
+        switch (generator.getType()) {
+            case DRAW:
+                result = coefficients.subList(0, lottery.getDraw());
+                result.forEach(c -> {
+                    c.setCoefficientSum(0);
+                    c.setDrawnCoefficient(0);
+                    c.setMcCoefficient(0);
+                    c.setRangeCoefficient(0);
+                });
+                user.setGeneratesLeft(user.getGeneratesLeft() - 1);
+                break;
+            case DRAW_STATS:
+                result = coefficients.subList(0, lottery.getDraw());
+                user.setGeneratesLeft(user.getGeneratesLeft() - 2);
+                break;
+            default:
+                result = coefficients;
+                user.setGeneratesLeft(user.getGeneratesLeft() - 4);
+                break;
+        }
+        userRepository.save(user);
+        return result;
+    }
 
-        coefficients.sort(Comparator.comparing(NumberCoefficient::getCoefficientSum).reversed());
-        return coefficients;
+    private void validateGeneratesLeft(GeneratorType type, int generatesLeft) {
+        if (generatesLeft < 1) {
+            throw new ValidationException("Not enough tickets");
+        } else if (type.equals(GeneratorType.DRAW_STATS) && generatesLeft < 2) {
+            throw new ValidationException("You need 2 tickets to generate statistics for next draw");
+        } else if (type.equals(GeneratorType.FULL) && generatesLeft < 4) {
+            throw new ValidationException("You need 4 tickets to generate FULL number statistics");
+        }
     }
 
     private Map<Integer, Double> calculateDrawnCoefficients(NumberStatistics statsForDraws, NumberStatistics statsForAll, Integer draws, Double drawMultiplier, Integer maxDraws, Lottery lottery) {
@@ -129,11 +178,11 @@ public class StatisticsServiceImpl implements StatisticsService {
             numberCoefficients.put(i, 0.0);
         }
         statsForDraws.getStats().forEach(ns ->
-            {
-                NumberStat nsAll = statsForAll.getStats().stream().filter(nsA -> nsA.getNumber() == ns.getNumber()).findFirst().get();
-                numberCoefficients.put(ns.getNumber(), numberCoefficients.get(ns.getNumber()) +
-                    ((1.0 * ns.getDrawn() / draws) * (1.0 * nsAll.getDrawn() / maxDraws) + (1.0 * nsAll.getCyclesNotDrawn() / maxDraws)));
-            }
+                {
+                    NumberStat nsAll = statsForAll.getStats().stream().filter(nsA -> nsA.getNumber() == ns.getNumber()).findFirst().get();
+                    numberCoefficients.put(ns.getNumber(), numberCoefficients.get(ns.getNumber()) +
+                            ((1.0 * ns.getDrawn() / draws) * (1.0 * nsAll.getDrawn() / maxDraws) + (1.0 * nsAll.getCyclesNotDrawn() / maxDraws)));
+                }
         );
         numberCoefficients.forEach((k, v) -> numberCoefficients.put(k, numberCoefficients.get(k) * drawMultiplier));
         return numberCoefficients;
@@ -152,7 +201,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         rangeForDraws.getStats().forEach(rs -> {
             int interval = rs.getTo() - rs.getFrom() + 1;
             RangeStat allRs = rangeForAll.getStats().stream().filter(rsA -> rsA.getFrom() == rs.getFrom() && rsA.getTo() == rs.getTo())
-                .findFirst().orElseThrow(() -> new RuntimeException("Different range interval length for all draws"));
+                    .findFirst().orElseThrow(() -> new RuntimeException("Different range interval length for all draws"));
             for (int i = rs.getFrom(); i <= rs.getTo(); i++) {
                 int finalI = i;
                 double drawnInDraws = 1.0 * statsForDraws.getStats().stream().filter(s -> s.getNumber() == finalI).findFirst().get().getDrawn() / rs.getDraws();
@@ -160,10 +209,10 @@ public class StatisticsServiceImpl implements StatisticsService {
                 double drawsRangePercent = (rs.getDraws() / (1.0 * draws * interval)) / (allRs.getDraws() / (50.0 * interval));
                 double drawnPercent = 1.0 * drawnInDraws / drawnInAll;
                 rangeDrawsCoefficient.put(i,
-                    (
-                        (drawsRangePercent >= 1 ? -1.0 * (drawsRangePercent - (int) drawsRangePercent) : drawsRangePercent * rangeMultiplier) +
-                            (drawnPercent >= 1 ? -1.0 * (drawnPercent - (int) drawnPercent) : drawnPercent * rangeMultiplier)
-                    ) / interval
+                        (
+                                (drawsRangePercent >= 1 ? -1.0 * (drawsRangePercent - (int) drawsRangePercent) : drawsRangePercent * rangeMultiplier) +
+                                        (drawnPercent >= 1 ? -1.0 * (drawnPercent - (int) drawnPercent) : drawnPercent * rangeMultiplier)
+                        ) / interval
                 );
             }
         });
@@ -183,18 +232,18 @@ public class StatisticsServiceImpl implements StatisticsService {
         }
 
         pairsDraws.getMostCommonStats().forEach(mc ->
-            mc.getNumbers().forEach(n -> pairCoefficients.put(n, pairCoefficients.get(n) + (1.0 * mc.getDrawn() / draws)))
+                mc.getNumbers().forEach(n -> pairCoefficients.put(n, pairCoefficients.get(n) + (1.0 * mc.getDrawn() / draws)))
         );
         pairsAll.getMostCommonStats().forEach(mc ->
-            mc.getNumbers().forEach(n -> pairCoefficients.put(n, pairCoefficients.get(n) + (1.0 * mc.getDrawn() / maxDraws)))
+                mc.getNumbers().forEach(n -> pairCoefficients.put(n, pairCoefficients.get(n) + (1.0 * mc.getDrawn() / maxDraws)))
         );
         pairCoefficients.forEach((k, v) -> pairCoefficients.put(k, pairCoefficients.get(k) * 2 / lottery.getDraw()));
 
         tripleDraws.getMostCommonStats().forEach(mc ->
-            mc.getNumbers().forEach(n -> triplesCoefficients.put(n, triplesCoefficients.get(n) + (1.0 * mc.getDrawn() / draws)))
+                mc.getNumbers().forEach(n -> triplesCoefficients.put(n, triplesCoefficients.get(n) + (1.0 * mc.getDrawn() / draws)))
         );
         tripleAll.getMostCommonStats().forEach(mc ->
-            mc.getNumbers().forEach(n -> triplesCoefficients.put(n, triplesCoefficients.get(n) + (1.0 * mc.getDrawn() / maxDraws)))
+                mc.getNumbers().forEach(n -> triplesCoefficients.put(n, triplesCoefficients.get(n) + (1.0 * mc.getDrawn() / maxDraws)))
         );
         triplesCoefficients.forEach((k, v) -> triplesCoefficients.put(k, triplesCoefficients.get(k) * 3 / lottery.getDraw()));
 
