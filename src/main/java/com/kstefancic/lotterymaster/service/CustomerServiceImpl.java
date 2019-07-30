@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -75,8 +76,8 @@ public class CustomerServiceImpl implements CustomerService {
 
     private void generateAndSaveVerificationCode(User user) {
         Random rnd = new Random();
-        int number = rnd.nextInt(999999);
-        user.setVerificationCode(String.format("%06d", number));
+        int number = rnd.nextInt(9999);
+        user.setVerificationCode(String.format("%04d", number));
     }
 
     @Override
@@ -93,18 +94,16 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void resendVerificationCode(String email, String password) {
+    public void resendVerificationCode(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("No such user"));
         if(user.isEnabled()){
             throw new ValidationException("User is already verified");
-        }
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new ValidationException("Incorrect password");
         }
         generateAndSaveVerificationCode(user);
         sendVerificationMail(user);
     }
 
+    @Async
     private void sendVerificationMail(User user) {
         try {
             MimeMessage message = mailSender.createMimeMessage();

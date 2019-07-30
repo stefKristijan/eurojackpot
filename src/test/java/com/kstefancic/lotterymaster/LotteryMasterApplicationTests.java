@@ -14,10 +14,15 @@ import org.jsoup.select.Elements;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.mail.internet.MimeMessage;
 import javax.persistence.EntityNotFoundException;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -37,12 +42,15 @@ import static com.kstefancic.lotterymaster.domain.Constants.*;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class LotteryMasterApplicationTests {
+    @Autowired
+    private JavaMailSender javaMailSender;
 
     @Test
     public void contextLoads() {
     }
 
     @Test
+    @Ignore
     public void testInvoiceCreation() {
         Stripe.apiKey = "test_key";
 

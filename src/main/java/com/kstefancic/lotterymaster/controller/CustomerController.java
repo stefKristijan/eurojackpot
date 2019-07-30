@@ -35,10 +35,9 @@ public class CustomerController {
 
     @GetMapping("resend-verification-code")
     public void resendVerificationCode(
-            @RequestParam("email") String email,
-            @RequestParam("password") String password
+            @RequestParam("email") String email
     ){
-        customerService.resendVerificationCode(email, password);
+        customerService.resendVerificationCode(email);
     }
 
 }

@@ -1,6 +1,7 @@
 package com.kstefancic.lotterymaster.service;
 
 import com.kstefancic.lotterymaster.api.PaymentException;
+import com.kstefancic.lotterymaster.domain.TicketItem;
 import com.kstefancic.lotterymaster.domain.TicketOrder;
 import com.kstefancic.lotterymaster.domain.User;
 import com.kstefancic.lotterymaster.repository.UserRepository;
@@ -38,11 +39,12 @@ public class StripeServiceImpl implements StripeService {
         User user = userRepository.findById(customerId).orElseThrow(() -> new EntityNotFoundException("No such user"));
         Invoice invoice = null;
         try {
+            TicketItem ticketItem = TicketItem.forValue(ticketOrder.getTicketItem());
             Map<String, Object> invoiceItemParams = new HashMap<>();
             invoiceItemParams.put("customer", customerId);
-            invoiceItemParams.put("amount", ticketOrder.getTicketItem().getAmount());
+            invoiceItemParams.put("amount", ticketItem.getAmount());
             invoiceItemParams.put("currency", "eur");
-            invoiceItemParams.put("description", ticketOrder.getTicketItem().getDescription());
+            invoiceItemParams.put("description", ticketItem.getDescription());
             InvoiceItem.create(invoiceItemParams);
 
             Map<String, Object> invoiceParams = new HashMap<>();
@@ -60,7 +62,7 @@ public class StripeServiceImpl implements StripeService {
             params.put("payment_method", ticketOrder.getPaymentMethodId());
 
             intent = intent.confirm(params);
-            return generateResponse(ticketOrder.getTicketItem().getTickets(), user, intent);
+            return generateResponse(ticketItem.getTickets(), user, intent);
 
         } catch (StripeException e) {
             handleInvoice(invoice);

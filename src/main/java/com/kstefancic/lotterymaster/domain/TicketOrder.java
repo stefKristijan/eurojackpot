@@ -2,14 +2,14 @@ package com.kstefancic.lotterymaster.domain;
 
 public class TicketOrder {
 
-    private TicketItem ticketItem;
+    private String ticketItem;
     private String paymentMethodId;
 
-    public TicketItem getTicketItem() {
+    public String getTicketItem() {
         return ticketItem;
     }
 
-    public void setTicketItem(TicketItem ticketItem) {
+    public void setTicketItem(String ticketItem) {
         this.ticketItem = ticketItem;
     }
 

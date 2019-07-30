@@ -19,5 +19,5 @@ public interface CustomerService extends UserDetailsService {
 
     void verifyUser(String email, String code);
 
-    void resendVerificationCode(String email, String password);
+    void resendVerificationCode(String email);
 }

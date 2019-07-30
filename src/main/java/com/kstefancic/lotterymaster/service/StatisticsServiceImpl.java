@@ -88,7 +88,6 @@ public class StatisticsServiceImpl implements StatisticsService {
         return new MostCommonStatistics(mostCommons, extraMostCommons);
     }
 
-    //TODO - somewhere updates are made, figure out where that is (data is being inserted into database)
     @Override
     public List<NumberCoefficient> nextDrawNumberCoefficients(int lotteryId, Integer draws, Integer maxDraws, Double rangeMultiplier, Double mcMultiplier, Double drawnMultiplier, Integer range, Double lastDrawDivider) {
         Lottery lottery = lotteryRepository.findById(lotteryId)
