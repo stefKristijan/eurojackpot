@@ -469,6 +469,9 @@ public class LotteryServiceImpl implements LotteryService {
             mc.getNumbers().forEach(n ->
                 result.put(n, result.get(n) * (1.0 + (mc.getDrawn() / 5.0))));
         });
+        numberStatistics.getStats().forEach(
+            ns -> result.put(ns.getNumber(), result.get(ns.getNumber()) / Math.max(ns.getCyclesNotDrawn(), 1))
+        );
         AtomicInteger best = new AtomicInteger();
         AtomicReference<Double> currentScore = new AtomicReference<>((double) 0);
         result.forEach((k, v) -> {
