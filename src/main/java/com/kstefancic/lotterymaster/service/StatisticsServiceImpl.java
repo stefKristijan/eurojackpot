@@ -94,8 +94,8 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     @Override
-    public CoefficientStatistics nextDrawNumberCoefficients(int lotteryId, Generator generator) {
-        User user = userRepository.findById(SecurityContextHolder.getContext().getAuthentication().getName())
+    public CoefficientStatistics nextDrawNumberCoefficients(int lotteryId, Generator generator, String email) {
+        User user = userRepository.findByEmail(email != null ? email : SecurityContextHolder.getContext().getAuthentication().getName())
                 .orElseThrow(() -> new EntityNotFoundException("No such user"));
         Lottery lottery = lotteryRepository.findById(lotteryId)
                 .orElseThrow(() -> new EntityNotFoundException(Constants.NOT_FOUND_LOTTERY));
@@ -149,7 +149,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         switch (generator.getSort()) {
             case MC:
                 coefficients.sort(Comparator.comparing(NumberCoefficient::getMcCoefficient).reversed());
-                extraCoefficients.sort(Comparator.comparing(NumberCoefficient::getCoefficientSum).reversed());
+                extraCoefficients.sort(Comparator.comparing(NumberCoefficient::getCoefficientSum));
                 break;
             case DRAWS:
                 coefficients.sort(Comparator.comparing(NumberCoefficient::getDrawnCoefficient).reversed());
@@ -240,8 +240,8 @@ public class StatisticsServiceImpl implements StatisticsService {
                     .findFirst().orElseThrow(() -> new RuntimeException("Different range interval length for all draws"));
             for (int i = rs.getFrom(); i <= rs.getTo(); i++) {
                 int finalI = i;
-                double drawnInDraws = rs.getDraws() == 0 ? 0 : 1.0 * statsForDraws.getStats().stream().filter(s -> s.getNumber() == finalI).findFirst().get().getDrawn() / rs.getDraws();
-                double drawnInAll = allRs.getDraws() == 0 ? 0 :1.0 * statsForAll.getStats().stream().filter(s -> s.getNumber() == finalI).findFirst().get().getDrawn() / allRs.getDraws();
+                double drawnInDraws = 1.0 * statsForDraws.getStats().stream().filter(s -> s.getNumber() == finalI).findFirst().get().getDrawn() / rs.getDraws();
+                double drawnInAll = 1.0 * statsForAll.getStats().stream().filter(s -> s.getNumber() == finalI).findFirst().get().getDrawn() / allRs.getDraws();
                 double drawsRangePercent = (rs.getDraws() / (1.0 * draws * interval)) / (allRs.getDraws() / (1.0 * maxDraws * interval));
                 double drawnPercent = 1.0 * drawnInDraws / drawnInAll;
                 rangeDrawsCoefficient.put(i,

@@ -15,4 +15,16 @@ public interface LotteryService {
     List<Draw> findByLottery(Integer lotteryId, Pageable pageRequest);
 
     Lottery findById(Integer lotteryId);
+
+    void addDrawToLottery(int lotteryId, Draw draw);
+
+    void checkWinForLifeNumbers();
+
+    void playWinForLife();
+
+    void playGreeceKinoLotto();
+
+    void checkItaly2090Result();
+
+    void updateWinForLifeDraws();
 }

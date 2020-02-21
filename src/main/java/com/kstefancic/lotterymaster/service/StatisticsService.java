@@ -12,6 +12,6 @@ public interface StatisticsService {
 
     MostCommonStatistics lotteryMostCommon(int lotteryId, int quantity, Integer draws, int extraQuantity);
 
-    CoefficientStatistics nextDrawNumberCoefficients(int lotteryId, Generator generator);
+    CoefficientStatistics nextDrawNumberCoefficients(int lotteryId, Generator generator, String email);
 
 }

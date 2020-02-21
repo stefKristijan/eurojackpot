@@ -35,20 +35,20 @@ public class StripeServiceImpl implements StripeService {
     @Override
     public Map<String, Object> orderTickets(TicketOrder ticketOrder) {
         Stripe.apiKey = API_KEY;
-        String customerId = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findById(customerId).orElseThrow(() -> new EntityNotFoundException("No such user"));
+        User user = userRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName())
+            .orElseThrow(() -> new EntityNotFoundException("No such user"));
         Invoice invoice = null;
         try {
             TicketItem ticketItem = TicketItem.forValue(ticketOrder.getTicketItem());
             Map<String, Object> invoiceItemParams = new HashMap<>();
-            invoiceItemParams.put("customer", customerId);
+            invoiceItemParams.put("customer", user.getStripeId());
             invoiceItemParams.put("amount", ticketItem.getAmount());
             invoiceItemParams.put("currency", "eur");
             invoiceItemParams.put("description", ticketItem.getDescription());
             InvoiceItem.create(invoiceItemParams);
 
             Map<String, Object> invoiceParams = new HashMap<>();
-            invoiceParams.put("customer", customerId);
+            invoiceParams.put("customer", user.getStripeId());
             invoiceParams.put("auto_advance", true);
 
             invoice = Invoice.create(invoiceParams);
@@ -105,7 +105,7 @@ public class StripeServiceImpl implements StripeService {
     public Map<String, Object> confirmPayment(String paymentIntentId, int tickets) {
         Stripe.apiKey = API_KEY;
         String customerId = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findById(customerId).orElseThrow(() -> new EntityNotFoundException("No such user"));
+        User user = userRepository.findByEmail(customerId).orElseThrow(() -> new EntityNotFoundException("No such user"));
         PaymentIntent intent = null;
         try {
             intent = PaymentIntent.retrieve(paymentIntentId);

@@ -1,5 +1,6 @@
 package com.kstefancic.lotterymaster.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.validator.constraints.URL;
 
 import javax.persistence.*;
@@ -18,6 +19,7 @@ public class ResultUrl {
     private String url;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable =  false, name = "lottery_id", referencedColumnName = "id")
+    @JsonIgnore
     private Lottery lottery;
 
     public Long getId() {

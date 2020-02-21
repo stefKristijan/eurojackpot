@@ -16,7 +16,6 @@
     <name>Lottery master</name>
     <description>Lottery master - lottery statistics</description>
 
-    <packaging>war</packaging>
     <properties>
         <java.version>1.8</java.version>
     </properties>

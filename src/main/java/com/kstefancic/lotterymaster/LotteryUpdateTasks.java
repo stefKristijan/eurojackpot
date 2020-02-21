@@ -33,32 +33,32 @@ public class LotteryUpdateTasks {
 
 //    @PostConstruct
     private void initializeLotteries() {
-        logger.info("Initializing lotteries that are not yet initialized");
+        logger.debug("Initializing lotteries that are not yet initialized");
         lotteryService.initializeLotteries();
     }
 
     @Scheduled(cron = "0 0/30 20-23 * * 0,4")
     public void updateLoto6od45() {
-        logger.info("Updating " + LOTO_6_OD_45_UK + " draws");
+        logger.debug("Updating " + LOTO_6_OD_45_UK + " draws");
         hlLotteriesDrawsService.updateDraws(LOTO_6_OD_45_UK, LOTO_6_OD_45_URL);
     }
 
     @Scheduled(cron = "0 0/30 20-23 * * 3,6")
     public void updateLoto7od39() {
-        logger.info("Updating " + LOTO_7_OD_35_UK + " draws");
+        logger.debug("Updating " + LOTO_7_OD_35_UK + " draws");
         hlLotteriesDrawsService.updateDraws(LOTO_7_OD_35_UK, LOTO_7_OD_35_URL);
     }
 
     @Scheduled(cron = "0 0 0 * * 6")
     public void updateEurojackpot(){
-        logger.info("Updating Eurojackpot draws");
+        logger.debug("Updating Eurojackpot draws");
         eurojackpotDrawsService.updateDraws();
     }
 
-    @Scheduled(cron = "0 0/15 * * * *")
+    @Scheduled(cron = "0 0/10 * * * *")
     public void updatePskLotteries(){
-        logger.info("Updating PSK lotteries");
-        pskLotteriesService.updateDraws();
+        logger.debug("Updating PSK lotteries");
+        pskLotteriesService.updateDraws(5, false);
     }
 
     @Scheduled(cron = "0/30 * * * * *")
@@ -71,5 +71,31 @@ public class LotteryUpdateTasks {
     public void deleteOldGreekKenoAndItalianKinoData(){
         logger.info("Deleting germania lotteries from 2 days ago");
         germaniaLotteriesService.delete2DaysAgoLotteries();
+    }
+
+    //Testing Win For Life success rate
+    @Scheduled(cron = "0 5 7-23 * * *")
+    public void checkResultOfWinForLife(){
+        lotteryService.checkWinForLifeNumbers();
+    }
+
+//    @Scheduled(cron = "0 4/15 8-22 * * *")
+    public void playGreeceKinoLotto(){
+        lotteryService.playGreeceKinoLotto();
+    }
+
+    @Scheduled(cron = "0 4/15 * * * *")
+    public void checkItaly2090Result(){
+        lotteryService.checkItaly2090Result();
+    }
+
+    @Scheduled(cron = "0 52 7-23 * * *")
+    public void playWinForLife(){
+        lotteryService.playWinForLife();
+    }
+
+    @Scheduled(cron = "0 20/5 7-23 * * *")
+    public void updateWinForLifeDraws(){
+        lotteryService.updateWinForLifeDraws();
     }
 }

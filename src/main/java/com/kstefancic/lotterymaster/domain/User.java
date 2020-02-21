@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.Email;
@@ -15,8 +17,12 @@ import javax.validation.constraints.NotBlank;
 public class User {
 
     @Id
-    @Column(nullable = false, updatable = false, length = 100, unique = true)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(length = 100, unique = true)
+    @JsonIgnore
+    private String stripeId;
     @NotBlank
     @Email
     @Column(nullable = false, updatable = false, unique = true, length = 100)
@@ -36,6 +42,14 @@ public class User {
         return verificationCode;
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public void setVerificationCode(String verificationCode) {
         this.verificationCode = verificationCode;
     }
@@ -48,12 +62,12 @@ public class User {
         this.enabled = enabled;
     }
 
-    public String getId() {
-        return id;
+    public String getStripeId() {
+        return stripeId;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setStripeId(String stripeId) {
+        this.stripeId = stripeId;
     }
 
     public String getEmail() {

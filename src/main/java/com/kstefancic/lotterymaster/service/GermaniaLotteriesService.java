@@ -58,7 +58,7 @@ public class GermaniaLotteriesService {
             int sizeIT = italianKeno.getDraws().size() - italianSize;
             int sizeGR = greekKino.getDraws().size() - greekSize;
             if (sizeIT != 0 || sizeGR != 0)
-                logger.info("Added {} {} draws and {} {} draws", sizeIT, TALIJANSKI_KENO, sizeGR, GRCKI_KINO);
+                logger.debug("Added {} {} draws and {} {} draws", sizeIT, TALIJANSKI_KENO, sizeGR, GRCKI_KINO);
         } catch (Exception e) {
             logger.error("Error while connecting or parsing Germania lotteries", e);
         }

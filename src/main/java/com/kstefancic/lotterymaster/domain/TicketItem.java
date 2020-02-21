@@ -8,11 +8,11 @@ import java.util.Map;
 
 public enum TicketItem {
 
-    TICKET_1("1 LotteryMaster Generator TicketItem", 50,1),
+    TICKET_1("1 LotteryMaster Generator Ticket", 50,1),
     TICKET_10("10 LotteryMaster Generator Tickets", 400, 10),
     TICKET_20("20 LotteryMaster Generator Tickets", 700, 20),
     TICKET_50("50 LotteryMaster Generator Tickets", 1500, 50),
-    TICKET_100("100 LotteryMaster Generator Tickets", 2500, 100);
+    TICKET_100("100 LotteryMaster Generator Tickets", 2000, 100);
 
     private static Map<String, TicketItem> namesMap = new HashMap<String, TicketItem>(5);
 

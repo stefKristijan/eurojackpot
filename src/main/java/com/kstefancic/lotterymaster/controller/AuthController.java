@@ -20,6 +20,6 @@ public class AuthController {
 
     @GetMapping
     public HttpEntity<?> getAuthenticatedUser(){
-        return ResponseEntity.ok(userRepository.findById(SecurityContextHolder.getContext().getAuthentication().getName()));
+        return ResponseEntity.ok(userRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()));
     }
 }

@@ -20,6 +20,7 @@ public class Lottery {
     private String uniqueName;
     @NotNull
     private Integer maxNumber;
+    private String englishName;
     @NotNull
     private Integer draw;
     private Integer maxExtraNumber;
@@ -64,6 +65,14 @@ public class Lottery {
 
     public void setDraws(List<Draw> draws) {
         this.draws = draws;
+    }
+
+    public String getEnglishName() {
+        return englishName;
+    }
+
+    public void setEnglishName(String englishName) {
+        this.englishName = englishName;
     }
 
     public List<ResultUrl> getResultUrls() {
