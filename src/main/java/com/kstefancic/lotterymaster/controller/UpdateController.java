@@ -30,10 +30,10 @@ public class UpdateController {
         @RequestParam("password") String password
     ) {
         if (password.equals("UPdatePassword1!")) {
-            service.updateDraws(50, true);
-            hlLotteriesDrawsService.updateDraws(LOTO_7_OD_35_UK, LOTO_7_OD_35_URL);
-            hlLotteriesDrawsService.updateDraws(LOTO_6_OD_45_UK, LOTO_6_OD_45_URL);
-            eurojackpotDrawsService.updateDraws();
+            service.updateDraws(365, true);
+//            hlLotteriesDrawsService.updateDraws(LOTO_7_OD_35_UK, LOTO_7_OD_35_URL);
+//            hlLotteriesDrawsService.updateDraws(LOTO_6_OD_45_UK, LOTO_6_OD_45_URL);
+            eurojackpotDrawsService.updateDraws(false);
         }
     }
 
@@ -61,5 +61,12 @@ public class UpdateController {
     public void testPlay(@RequestParam("password") String password){
         if(password.equals("!Helloh@Tes%"))
         lotteryService.playWinForLife();
+    }
+
+    @PutMapping("change-allow-play")
+    public boolean changeAllowPlay(
+        @RequestParam("amounts") int[] amounts
+    ){
+        return lotteryService.changeAllowPlay(amounts);
     }
 }

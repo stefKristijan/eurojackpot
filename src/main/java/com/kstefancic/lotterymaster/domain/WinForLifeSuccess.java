@@ -41,8 +41,27 @@ public class WinForLifeSuccess {
     private Integer testNum;
     private Boolean successTest;
 
+    private Integer testNum2;
+    private Boolean successTest2;
+
     public Integer getTestNum() {
         return testNum;
+    }
+
+    public Integer getTestNum2() {
+        return testNum2;
+    }
+
+    public void setTestNum2(Integer testNum2) {
+        this.testNum2 = testNum2;
+    }
+
+    public Boolean getSuccessTest2() {
+        return successTest2;
+    }
+
+    public void setSuccessTest2(Boolean successTest2) {
+        this.successTest2 = successTest2;
     }
 
     public void setTestNum(Integer testNum) {

@@ -37,13 +37,13 @@ public class LotteryUpdateTasks {
         lotteryService.initializeLotteries();
     }
 
-    @Scheduled(cron = "0 0/30 20-23 * * 0,4")
+//    @Scheduled(cron = "0 0/30 20-23 * * 0,4")
     public void updateLoto6od45() {
         logger.debug("Updating " + LOTO_6_OD_45_UK + " draws");
         hlLotteriesDrawsService.updateDraws(LOTO_6_OD_45_UK, LOTO_6_OD_45_URL);
     }
 
-    @Scheduled(cron = "0 0/30 20-23 * * 3,6")
+//    @Scheduled(cron = "0 0/30 20-23 * * 3,6")
     public void updateLoto7od39() {
         logger.debug("Updating " + LOTO_7_OD_35_UK + " draws");
         hlLotteriesDrawsService.updateDraws(LOTO_7_OD_35_UK, LOTO_7_OD_35_URL);
@@ -52,7 +52,7 @@ public class LotteryUpdateTasks {
     @Scheduled(cron = "0 0 0 * * 6")
     public void updateEurojackpot(){
         logger.debug("Updating Eurojackpot draws");
-        eurojackpotDrawsService.updateDraws();
+        eurojackpotDrawsService.updateDraws(true);
     }
 
     @Scheduled(cron = "0 0/10 * * * *")
@@ -63,7 +63,6 @@ public class LotteryUpdateTasks {
 
     @Scheduled(cron = "0/30 * * * * *")
     public void updateGreekKenoAndItalianKino(){
-//        logger.info("Updating Germania lotteries");
         germaniaLotteriesService.updateDraws();
     }
 
@@ -73,29 +72,30 @@ public class LotteryUpdateTasks {
         germaniaLotteriesService.delete2DaysAgoLotteries();
     }
 
-    //Testing Win For Life success rate
-    @Scheduled(cron = "0 5 7-23 * * *")
-    public void checkResultOfWinForLife(){
-        lotteryService.checkWinForLifeNumbers();
-    }
-
-//    @Scheduled(cron = "0 4/15 8-22 * * *")
-    public void playGreeceKinoLotto(){
-        lotteryService.playGreeceKinoLotto();
-    }
-
-    @Scheduled(cron = "0 4/15 * * * *")
-    public void checkItaly2090Result(){
-        lotteryService.checkItaly2090Result();
-    }
-
-    @Scheduled(cron = "0 52 7-23 * * *")
-    public void playWinForLife(){
-        lotteryService.playWinForLife();
-    }
-
     @Scheduled(cron = "0 20/5 7-23 * * *")
     public void updateWinForLifeDraws(){
         lotteryService.updateWinForLifeDraws();
     }
+
+//    Testing Win For Life success rate
+//    @Scheduled(cron = "0 51 7-23 * * *")
+
+    public void checkResultOfWinForLife(){
+        lotteryService.checkWinForLifeNumbers();
+    }
+//    @Scheduled(cron = "0 4/15 8-22 * * *")
+
+    public void playGreeceKinoLotto(){
+        lotteryService.playGreeceKinoLotto();
+    }
+//    @Scheduled(cron = "0 4/15 * * * *")
+
+    public void checkItaly2090Result(){
+        lotteryService.checkItaly2090Result();
+    }
+//    @Scheduled(cron = "0 52 7-23 * * *")
+//    public void playWinForLife(){
+//        lotteryService.playWinForLife();
+//    }
+//
 }

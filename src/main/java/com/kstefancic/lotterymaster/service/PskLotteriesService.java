@@ -81,9 +81,6 @@ public class PskLotteriesService {
                 }
                 date = date.minusDays(1);
             }
-            if (fullUpdate) {
-                logger.debug("Added {} draws from PSK results", drawsAdded);
-            }
             logger.debug("Added {} draws from PSK results", drawsAdded);
         } catch (Exception e) {
             logger.error("Lotteries from PSK were not updated successfully!", e);

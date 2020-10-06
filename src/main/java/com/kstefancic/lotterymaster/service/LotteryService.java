@@ -20,6 +20,8 @@ public interface LotteryService {
 
     void checkWinForLifeNumbers();
 
+    boolean changeAllowPlay(int[] amounts);
+
     void playWinForLife();
 
     void playGreeceKinoLotto();
